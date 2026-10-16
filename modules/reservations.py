@@ -457,6 +457,8 @@ def modify_reservation():
 
         print("Opción inválida.")
 
+    selected_reservation = customer_reservations[option - 1]
+
     show_reservation(selected_reservation)
 
     while True:
@@ -871,6 +873,47 @@ def recalculate_reservation(reservation):
     reservation["subtotal"] = subtotal
     reservation["iva"] = iva
     reservation["total"] = total
+
+def modify_payment_method(reservation):
+
+    print("\n===== MODIFICAR MÉTODO DE PAGO =====\n")
+
+    while True:
+
+        payment_method = custom_input(
+            "Nuevo método de pago (efectivo/tarjeta/transferencia): "
+        ).lower()
+
+        if payment_method in ["efectivo", "tarjeta", "transferencia"]:
+
+            break
+
+        print("Método inválido. Intente nuevamente.")
+
+    reservation["payment_method"] = payment_method
+    recalculate_reservation(reservation)
+
+    print("\nMétodo de pago actualizado correctamente.")
+
+def modify_receipt(reservation):
+
+    print("\n===== MODIFICAR COMPROBANTE =====\n")
+
+    while True:
+
+        receipt_type = custom_input(
+            "Nuevo tipo de comprobante (boleta/factura): "
+        ).lower()
+
+        if receipt_type in ["boleta", "factura"]:
+
+            break
+
+        print("Tipo de comprobante inválido. Intente nuevamente.")
+
+    reservation["receipt_type"] = receipt_type
+
+    print("\nComprobante actualizado correctamente.")
 
 def modify_room(reservation):
 
