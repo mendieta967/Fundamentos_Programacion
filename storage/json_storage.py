@@ -18,4 +18,4 @@ def customer_has_reservations(dni):
     for reservation in reservations:
         if reservation["customer_dni"] == dni:
             return True
-    return False
+    return False 

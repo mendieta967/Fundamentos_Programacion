@@ -1,4 +1,4 @@
-from storage import *
+from storage.json_storage import load_reservations
 from datetime import datetime
 
 

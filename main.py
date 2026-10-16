@@ -1,4 +1,4 @@
-from reservations import *
+from modules.reservations import reservations_menu
 
 def main():
 
@@ -6,9 +6,11 @@ def main():
 
         print("\n===== HOSTEL MELIMER =====\n")
 
-        print("1. Crear reserva")
-        print("2. Ver mis reservas")
-        print("3. Salir")
+        print("1. Gestión de Reservas")
+        print("2. Gestión de Clientes")
+        print("3. Gestión de Habitaciones")
+        print("4. Reportes")
+        print("0. Salir")
 
 
         option = input("\nSeleccione una opción: ")
@@ -16,15 +18,9 @@ def main():
 
         if option == "1":
 
-            create_reservation()
+            reservations_menu()
 
-
-        elif option == "2":
-
-            show_customer_reservations()
-
-
-        elif option == "3":
+        elif option == "0":
 
             print("\nGracias por utilizar el sistema.")
 
