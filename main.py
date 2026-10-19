@@ -1,4 +1,6 @@
-from modules.reservations import reservations_menu
+from modules.reservations.menu import reservations_menu
+from modules.validations import custom_input
+
 
 def main():
 
@@ -12,20 +14,31 @@ def main():
         print("4. Reportes")
         print("0. Salir")
 
-
-        option = input("\nSeleccione una opción: ")
-
+        option = custom_input(
+            "\nSeleccione una opción: "
+        )
 
         if option == "1":
 
-            reservations_menu()
+            reservations_menu() 
+
+        elif option == "2":
+
+            print("Módulo en desarrollo.")
+
+        elif option == "3":
+
+            print("Módulo en desarrollo.")
+
+        elif option == "4":
+
+            print("Módulo en desarrollo.")
 
         elif option == "0":
 
             print("\nGracias por utilizar el sistema.")
 
             break
-
 
         else:
 
