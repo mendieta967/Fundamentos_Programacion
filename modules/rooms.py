@@ -10,30 +10,25 @@ rooms = {
         "type": "Simple",
         "capacity": 1,
         "price": 50,
-
     },
 
     102: {
         "type": "Simple",
         "capacity": 1,
         "price": 50,
-
     },
 
     103: {
         "type": "Simple",
         "capacity": 1,
         "price": 50,
-
     },
 
     104: {
         "type": "Simple",
         "capacity": 1,
         "price": 50,
-
     },
-
 
     # ===== DOUBLE ROOMS =====
 
@@ -41,14 +36,12 @@ rooms = {
         "type": "Double",
         "capacity": 2,
         "price": 80,
-
     },
 
     202: {
         "type": "Double",
         "capacity": 2,
         "price": 80,
-
     },
 
     203: {
@@ -56,7 +49,6 @@ rooms = {
         "capacity": 2,
         "price": 80,
     },
-
 
     # ===== SUITES =====
 
@@ -77,58 +69,169 @@ rooms = {
         "capacity": 4,
         "price": 120,
     }
+
 }
-# Función para mostrar habitaciones disponibles según la cantidad de personas
-# La cantidad de personas se pasa como parametro a la función, y se muestra solo las habitaciones que tienen capacidad suficiente y están disponibles.
-def show_available_rooms(people_count,check_in,check_out):
+
+
+# ==========================================
+# MOSTRAR HABITACIONES DISPONIBLES
+# ==========================================
+
+def show_available_rooms(people_count, check_in, check_out):
+
     print("=" * 35)
     print("     HABITACIONES DISPONIBLES")
     print("=" * 35 + "\n")
 
-# Variable para controlar si se encontraron habitaciones disponibles
     found_room = False
 
-# Iterar sobre las habitaciones y mostrar solo las que cumplen con los criterios
-# room_number es el número de la habitación, y room_data es un diccionario con los detalles de la habitación (tipo, capacidad, precio, disponibilidad).
-# rooms.items() devuelve una lista de tuplas, donde cada tupla contiene el número de la habitación y su información asociada. Esto permite iterar sobre todas las habitaciones y acceder a sus detalles para verificar si cumplen con los criterios de capacidad y disponibilidad.
     for room_number, room_data in rooms.items():
 
-# Si la capacidad de la habitación es mayor o igual a la cantidad de personas y la habitación está disponible
-        if room_data["capacity"] >= people_count and is_room_available_for_dates(room_number,check_in,check_out):
+        if (
+            room_data["capacity"] >= people_count
+            and
+            is_room_available_for_dates(
+                room_number,
+                check_in,
+                check_out
+            )
+        ):
 
-# Se marca que se encontró al menos una habitación disponible para esa cantidad de personas
             found_room = True
 
-# Se muestra la información de la habitación
             print(
                 f"{room_number} - "
-                f'{room_data["type"]} - '
-                f'Capacity: {room_data["capacity"]} - '
-                f'${room_data["price"]}'
+                f"{room_data['type']} - "
+                f"Capacidad: {room_data['capacity']} - "
+                f"${room_data['price']}"
             )
 
-# Si no se encontraron habitaciones disponibles para esa cantidad de personas, se muestra un mensaje indicando que no hay habitaciones disponibles.
     if not found_room:
-        print("No hay habitaciones disponible")
 
-# Función para verificar si una habitación existe dado su número
+        print("No hay habitaciones disponibles.")
+
+
+# ==========================================
+# VERIFICAR SI EXISTE UNA HABITACIÓN
+# ==========================================
+
 def room_exists(room_number):
+
     return room_number in rooms
 
-# Función para obtener la información de una habitación dado su número
+
+# ==========================================
+# OBTENER INFORMACIÓN DE UNA HABITACIÓN
+# ==========================================
+
 def get_room(room_number):
+
     return rooms[room_number]
 
-def is_room_available_for_dates(room_number, check_in, check_out):
+
+# ==========================================
+# VALIDAR DISPONIBILIDAD
+# ==========================================
+
+def is_room_available_for_dates(
+    room_number,
+    check_in,
+    check_out,
+    ignore_index=None):
+
     reservations = load_reservations()
-    new_check_in = datetime.strptime(check_in, "%d/%m/%Y")
 
-    new_check_out = datetime.strptime(check_out, "%d/%m/%Y")
+    new_check_in = datetime.strptime(
+        check_in,
+        "%d/%m/%Y"
+    )
 
-    for reservation in reservations:
+    new_check_out = datetime.strptime(
+        check_out,
+        "%d/%m/%Y"
+    )
+
+    for index, reservation in enumerate(reservations):
+
+        # Ignorar la reserva que se está modificando
+        if index == ignore_index:
+
+            continue
+
         if reservation["room_number"] == room_number:
-            existing_check_in = datetime.strptime(reservation["check_in"],"%d/%m/%Y")
-            existing_check_out = datetime.strptime(reservation["check_out"],"%d/%m/%Y")
-            if new_check_in < existing_check_out and new_check_out > existing_check_in:
+
+            existing_check_in = datetime.strptime(
+                reservation["check_in"],
+                "%d/%m/%Y"
+            )
+
+            existing_check_out = datetime.strptime(
+                reservation["check_out"],
+                "%d/%m/%Y"
+            )
+
+            if (
+                new_check_in < existing_check_out
+                and
+                new_check_out > existing_check_in
+            ):
+
                 return False
+
     return True
+
+def select_room(
+    guest_count,
+    check_in,
+    check_out,
+    ignore_index=None
+):
+
+    show_available_rooms(
+        guest_count,
+        check_in,
+        check_out
+    )
+
+    while True:
+
+        room_number = input(
+            "Seleccione una habitación: "
+        )
+
+        if not room_number.isdigit():
+
+            print("Debe ingresar un número de habitación.")
+            continue
+
+        room_number = int(room_number)
+
+        if not room_exists(room_number):
+
+            print("La habitación no existe.")
+            continue
+
+        room = get_room(room_number)
+
+        if room["capacity"] < guest_count:
+
+            print(
+                "La habitación no soporta esa cantidad de huéspedes."
+            )
+
+            continue
+
+        if not is_room_available_for_dates(
+            room_number,
+            check_in,
+            check_out,
+            ignore_index
+        ):
+
+            print(
+                "La habitación ya está reservada para esas fechas."
+            )
+
+            continue
+
+        return room_number, room
