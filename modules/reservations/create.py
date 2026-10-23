@@ -10,20 +10,6 @@ def create_reservation():
     print("Escriba 'cancelar' en cualquier momento para salir.\n")
 
     # ==============================
-    # VALIDAR NOMBRE
-    # ==============================
-
-    while True:
-
-        customer_name = custom_input("Ingrese su nombre y apellido: ")
-
-        if validate_name(customer_name):
-
-            break
-
-        print("Nombre inválido. Intente nuevamente.")
-
-    # ==============================
     # VALIDAR DNI
     # ==============================
 
@@ -38,17 +24,19 @@ def create_reservation():
         print("DNI inválido. Debe contener 8 dígitos numéricos.")
 
     # ==============================
-    # VALIDAR SI EL CLIENTE YA TIENE RESERVAS
+    # VALIDAR SI EL CLIENTE YA EXISTE
     # ==============================
 
-    if customer_has_reservations(customer_dni):
+    new_customer = False
 
-        print("\nEl cliente ya tiene reservas registradas.")
+    if customer_exists(customer_dni):
+
+        print("\nEl cliente ya se encuentra registrado.")
 
         while True:
 
             continue_reservation = custom_input(
-                "¿Desea realizar otra reserva? (s/n): "
+                "¿Desea realizar una nueva reserva? (s/n): "
             ).lower()
 
             if continue_reservation in ["s", "n"]:
@@ -63,19 +51,48 @@ def create_reservation():
 
             return
 
-    # ==============================
-    # VALIDAR TELÉFONO
-    # ==============================
+        customer = get_customer_by_dni(customer_dni)
 
-    while True:
+        customer_name = customer["customer_name"]
+        customer_phone = customer["customer_phone"]
 
-        customer_phone = custom_input("Ingrese su número de teléfono: ")
+    else:
 
-        if validate_phone(customer_phone):
+        new_customer = True
 
-            break
+        # ==============================
+        # VALIDAR NOMBRE
+        # ==============================
 
-        print("Teléfono inválido. Debe contener 9 dígitos numéricos.")
+        while True:
+
+            customer_name = custom_input(
+                "Ingrese su nombre y apellido: "
+            )
+
+            if validate_name(customer_name):
+
+                break
+
+            print("Nombre inválido. Intente nuevamente.")
+
+        # ==============================
+        # VALIDAR TELÉFONO
+        # ==============================
+
+        while True:
+
+            customer_phone = custom_input(
+                "Ingrese su número de teléfono: "
+            )
+
+            if validate_phone(customer_phone):
+
+                break
+
+            print(
+                "Teléfono inválido. Debe contener 9 dígitos numéricos."
+            )
 
     # ==============================
     # VALIDAR CHECK-IN
@@ -83,7 +100,9 @@ def create_reservation():
 
     while True:
 
-        check_in = custom_input("Ingrese fecha de entrada (dd/mm/yyyy): ")
+        check_in = custom_input(
+            "Ingrese fecha de entrada (dd/mm/yyyy): "
+        )
 
         if validate_date(check_in) and validate_future_date(check_in):
 
@@ -97,7 +116,9 @@ def create_reservation():
 
     while True:
 
-        check_out = custom_input("Ingrese fecha de salida (dd/mm/yyyy): ")
+        check_out = custom_input(
+            "Ingrese fecha de salida (dd/mm/yyyy): "
+        )
 
         if not validate_date(check_out):
 
@@ -105,11 +126,16 @@ def create_reservation():
 
             continue
 
-        nights = calculate_nights(check_in, check_out)
+        nights = calculate_nights(
+            check_in,
+            check_out
+        )
 
         if nights is None:
 
-            print("La fecha de salida debe ser posterior a la fecha de entrada.")
+            print(
+                "La fecha de salida debe ser posterior a la fecha de entrada."
+            )
 
             continue
 
@@ -121,7 +147,9 @@ def create_reservation():
 
     while True:
 
-        guest_count = custom_input("Ingrese cantidad de huéspedes: ")
+        guest_count = custom_input(
+            "Ingrese cantidad de huéspedes: "
+        )
 
         if validate_guest_count(guest_count):
 
@@ -223,13 +251,33 @@ def create_reservation():
 
     print(f"\nHabitación: {room_number}")
     print(f"Tipo: {room['type']}")
-    print(f"Precio por noche: ${room['price']}")
+    print(f"Precio por noche: S/ {room['price']}")
 
-    print(f"\nSubtotal: ${subtotal}")
-    print(f"IGV: ${igv}")
-    print(f"TOTAL: ${total}")
+    print(f"\nSubtotal: S/ {subtotal}")
+    print(f"IGV: S/ {igv}")
+    print(f"TOTAL: S/ {total}")
 
     print("\n¡Reserva realizada con éxito!")
+
+    # ==============================
+    # GUARDAR CLIENTE (SI ES NUEVO)
+    # ==============================
+
+    if new_customer:
+
+        customers = load_customers()
+
+        customer_data = {
+
+            "customer_name": customer_name,
+            "customer_dni": customer_dni,
+            "customer_phone": customer_phone
+
+        }
+
+        customers.append(customer_data)
+
+        save_customers(customers)
 
     # ==============================
     # GUARDAR RESERVA
@@ -237,9 +285,7 @@ def create_reservation():
 
     reservation_data = {
 
-        "customer_name": customer_name,
         "customer_dni": customer_dni,
-        "customer_phone": customer_phone,
 
         "check_in": check_in,
         "check_out": check_out,
@@ -256,6 +302,7 @@ def create_reservation():
         "subtotal": subtotal,
         "igv": igv,
         "total": total
+
     }
 
     reservations = load_reservations()

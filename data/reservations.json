@@ -12,7 +12,7 @@
         "payment_method": "tarjeta",
         "receipt_type": "factura",
         "subtotal": 240,
-        "iva": 50.4,
+        "igv": 50.4,
         "total": 290.4
     },
     {
@@ -28,7 +28,7 @@
         "payment_method": "tarjeta",
         "receipt_type": "factura",
         "subtotal": 50,
-        "iva": 10.5,
+        "igv": 10.5,
         "total": 60.5
     },
     {
@@ -44,7 +44,7 @@
         "payment_method": "tarjeta",
         "receipt_type": "factura",
         "subtotal": 720,
-        "iva": 151.2,
+        "igv": 151.2,
         "total": 871.2
     },
     {
@@ -60,7 +60,7 @@
         "payment_method": "tarjeta",
         "receipt_type": "factura",
         "subtotal": 480,
-        "iva": 100.8,
+        "igv": 100.8,
         "total": 580.8
     },
     {
@@ -76,7 +76,23 @@
         "payment_method": "tarjeta",
         "receipt_type": "boleta",
         "subtotal": 480,
-        "iva": 100.8,
+        "igv": 100.8,
         "total": 580.8
+    },
+    {
+        "customer_name": "pedro Olortegui",
+        "customer_dni": "73812771",
+        "customer_phone": "962314587",
+        "check_in": "23/10/2026",
+        "check_out": "26/10/2026",
+        "nights": 3,
+        "guest_count": 2,
+        "room_number": 201,
+        "room_type": "Double",
+        "payment_method": "efectivo",
+        "receipt_type": "boleta",
+        "subtotal": 240,
+        "igv": 43.199999999999996,
+        "total": 283.2
     }
 ]
