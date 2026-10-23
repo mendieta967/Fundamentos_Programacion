@@ -1,8 +1,36 @@
-from modules.validations import *
-from storage.json_storage import *
-from modules.rooms import *
-from modules.payments import *
+from modules.payments import (
+    calculate_igv,
+    calculate_subtotal,
+    calculate_total
+)
 
+from modules.rooms import (
+    get_room,
+    is_room_available_for_dates,
+    select_room
+)
+
+from modules.validations import (
+    calculate_nights,
+    custom_input,
+    validate_date,
+    validate_dni,
+    validate_future_date,
+    validate_phone
+)
+
+from storage.json_storage import (
+    get_customer_by_dni,
+    load_customers,
+    load_reservations,
+    save_customers,
+    save_reservations
+)
+
+
+# ==========================================
+# SELECCIONAR RESERVA
+# ==========================================
 
 def select_reservation():
 
@@ -13,7 +41,6 @@ def select_reservation():
     if not validate_dni(customer_dni):
 
         print("DNI inválido.")
-
         return None, None, None
 
     reservations = load_reservations()
@@ -31,10 +58,9 @@ def select_reservation():
     if not customer_reservations:
 
         print("No se encontraron reservas.")
-
         return None, None, None
 
-    print("\nReservas encontradas:\n")
+    print("\n===== RESERVAS ENCONTRADAS =====\n")
 
     for option, (index, reservation) in enumerate(
         customer_reservations,
@@ -42,9 +68,10 @@ def select_reservation():
     ):
 
         print(f"{option}. Habitación: {reservation['room_number']}")
+        print(f"   Tipo: {reservation['room_type']}")
         print(f"   Check-in: {reservation['check_in']}")
         print(f"   Check-out: {reservation['check_out']}")
-        print(f"   Total: ${reservation['total']}")
+        print(f"   Total: S/ {reservation['total']:.2f}")
         print("-" * 35)
 
     while True:
@@ -53,28 +80,40 @@ def select_reservation():
             "\nSeleccione una reserva: "
         )
 
-        if selected.isdigit():
+        if (
+            selected.isdigit()
+            and
+            1 <= int(selected) <= len(customer_reservations)
+        ):
 
-            selected = int(selected)
+            reservation_index = customer_reservations[
+                int(selected) - 1
+            ][0]
 
-            if 1 <= selected <= len(customer_reservations):
+            reservation = reservations[
+                reservation_index
+            ]
 
-                break
+            return (
+                reservations,
+                reservation_index,
+                reservation
+            )
 
         print("Opción inválida.")
 
-    reservation_index = customer_reservations[selected - 1][0]
 
-    reservation = reservations[reservation_index]
-
-    return reservations, reservation_index, reservation
-
+# ==========================================
+# MODIFICAR RESERVA
+# ==========================================
 
 def modify_reservation():
 
     print("\n===== MODIFICAR RESERVA =====\n")
 
-    reservations, reservation_index, reservation = select_reservation()
+    reservations, reservation_index, reservation = (
+        select_reservation()
+    )
 
     if reservations is None:
 
@@ -84,15 +123,18 @@ def modify_reservation():
 
         print("\n¿Qué desea modificar?\n")
 
-        print("1. Teléfono")
+        print("1. Datos del cliente")
         print("2. Estadía")
         print("0. Cancelar")
 
-        option = custom_input("\nSeleccione una opción: ")
+        option = custom_input(
+            "\nSeleccione una opción: "
+        )
 
         if option == "1":
 
-            modify_phone(reservation)
+            modify_customer(reservation)
+
             break
 
         elif option == "2":
@@ -101,6 +143,8 @@ def modify_reservation():
                 reservation,
                 reservation_index
             )
+
+            save_reservations(reservations)
 
             break
 
@@ -113,33 +157,73 @@ def modify_reservation():
 
             print("Opción inválida.")
 
-    save_reservations(reservations)
-
-    print("\nReserva modificada correctamente.")
+    print("\nDatos actualizados correctamente.")
 
 
-def modify_phone(reservation):
+# ==========================================
+# MODIFICAR DATOS DEL CLIENTE
+# ==========================================
+
+def modify_customer(reservation):
+
+    customers = load_customers()
+
+    customer = get_customer_by_dni(
+        reservation["customer_dni"]
+    )
 
     while True:
 
-        new_phone = custom_input(
-            "Ingrese el nuevo teléfono: "
+        print("\n===== DATOS DEL CLIENTE =====\n")
+
+        print("1. Modificar teléfono")
+        print("0. Volver")
+
+        option = custom_input(
+            "\nSeleccione una opción: "
         )
 
-        if validate_phone(new_phone):
+        if option == "1":
 
-            reservation["customer_phone"] = new_phone
+            while True:
 
-            print("\nTeléfono actualizado correctamente.")
+                new_phone = custom_input(
+                    "Ingrese el nuevo teléfono: "
+                )
+
+                if validate_phone(new_phone):
+
+                    customer["customer_phone"] = new_phone
+
+                    save_customers(customers)
+
+                    print(
+                        "\nTeléfono actualizado correctamente."
+                    )
+
+                    return
+
+                print(
+                    "Teléfono inválido. Debe contener 9 dígitos."
+                )
+
+        elif option == "0":
 
             return
 
-        print(
-            "Teléfono inválido. Debe contener 9 dígitos."
-        )
+        else:
+
+            print("Opción inválida.")
 
 
-def modify_stay(reservation, reservation_index):
+# ==========================================
+# MODIFICAR ESTADÍA
+# ==========================================
+
+def modify_stay(
+    reservation,
+    reservation_index
+):
 
     print("\n===== MODIFICAR ESTADÍA =====\n")
 

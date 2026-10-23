@@ -7,6 +7,10 @@ from modules.validations import custom_input
 from storage.json_storage import load_reservations
 
 
+# ==========================================
+# MENÚ DE ORDENAMIENTO
+# ==========================================
+
 def sort_reservations():
 
     while True:
@@ -25,20 +29,17 @@ def sort_reservations():
         if option == "1":
 
             sort_by_check_in()
-
-            break
+            return
 
         elif option == "2":
 
             sort_by_check_out()
-
-            break
+            return
 
         elif option == "3":
 
             sort_by_room()
-
-            break
+            return
 
         elif option == "0":
 
@@ -48,18 +49,26 @@ def sort_reservations():
 
             print("Opción inválida.")
 
+
+# ==========================================
+# ORDENAR POR CHECK-IN
+# ==========================================
+
 def sort_by_check_in():
 
     reservations = load_reservations()
+
+    if not reservations:
+
+        print("No hay reservas registradas.")
+        return
 
     reservations.sort(
 
         key=lambda reservation:
 
         datetime.strptime(
-
             reservation["check_in"],
-
             "%d/%m/%Y"
         )
 
@@ -69,18 +78,26 @@ def sort_by_check_in():
 
     show_sorted_reservations(reservations)
 
+
+# ==========================================
+# ORDENAR POR CHECK-OUT
+# ==========================================
+
 def sort_by_check_out():
 
     reservations = load_reservations()
+
+    if not reservations:
+
+        print("No hay reservas registradas.")
+        return
 
     reservations.sort(
 
         key=lambda reservation:
 
         datetime.strptime(
-
             reservation["check_out"],
-
             "%d/%m/%Y"
         )
 
@@ -90,26 +107,38 @@ def sort_by_check_out():
 
     show_sorted_reservations(reservations)
 
+
+# ==========================================
+# ORDENAR POR HABITACIÓN
+# ==========================================
+
 def sort_by_room():
 
     reservations = load_reservations()
 
+    if not reservations:
+
+        print("No hay reservas registradas.")
+        return
+
     reservations.sort(
-        key=lambda reservation: reservation["room_number"]
+
+        key=lambda reservation:
+
+        reservation["room_number"]
+
     )
 
     print("\n===== RESERVAS ORDENADAS POR HABITACIÓN =====\n")
 
     show_sorted_reservations(reservations)
 
-    
+
+# ==========================================
+# MOSTRAR RESERVAS
+# ==========================================
+
 def show_sorted_reservations(reservations):
-
-    if not reservations:
-
-        print("No hay reservas registradas.")
-
-        return
 
     for reservation in reservations:
 

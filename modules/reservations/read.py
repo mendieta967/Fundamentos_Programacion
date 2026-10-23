@@ -1,17 +1,23 @@
-from modules.validations import (
-    custom_input,
-    validate_dni,
-)
-
 from modules.helpers import show_reservation
 
-from storage.json_storage import load_reservations
+from modules.validations import (
+    custom_input,
+    validate_dni
+)
 
+from storage.json_storage import (
+    load_reservations
+)
+
+
+# ==========================================
+# MOSTRAR RESERVAS DE UN CLIENTE
+# ==========================================
 
 def show_customer_reservations():
 
     customer_dni = custom_input(
-        "Ingrese su DNI: "
+        "Ingrese el DNI: "
     )
 
     if not validate_dni(customer_dni):
@@ -22,9 +28,15 @@ def show_customer_reservations():
 
     reservations = load_reservations()
 
-    found_reservation = False
+    if not reservations:
+
+        print("No hay reservas registradas.")
+
+        return
 
     print("\n===== MIS RESERVAS =====\n")
+
+    found_reservation = False
 
     for reservation in reservations:
 
