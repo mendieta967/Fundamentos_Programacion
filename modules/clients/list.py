@@ -4,6 +4,11 @@ from storage.json_storage import (
     get_all_customers
 )
 
+
+# ==========================================
+# LISTAR CLIENTES
+# ==========================================
+
 def list_customers():
 
     customers = get_all_customers()

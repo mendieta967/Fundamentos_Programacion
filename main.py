@@ -1,7 +1,13 @@
-from modules.reservations.menu import reservations_menu
-from modules.validations import custom_input
 from modules.clients.menu import clients_menu
+from modules.reports.menu import reports_menu
+from modules.reservations.menu import reservations_menu
+from modules.room_views.menu import rooms_menu
+from modules.validations import custom_input
 
+
+# ==========================================
+# MENÚ PRINCIPAL
+# ==========================================
 
 def main():
 
@@ -21,7 +27,7 @@ def main():
 
         if option == "1":
 
-            reservations_menu() 
+            reservations_menu()
 
         elif option == "2":
 
@@ -29,11 +35,11 @@ def main():
 
         elif option == "3":
 
-            print("Módulo en desarrollo.")
+            rooms_menu()
 
         elif option == "4":
 
-            print("Módulo en desarrollo.")
+            reports_menu()
 
         elif option == "0":
 

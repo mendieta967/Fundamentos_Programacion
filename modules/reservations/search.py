@@ -1,6 +1,22 @@
-from modules.validations import custom_input, validate_date, validate_dni
-from storage.json_storage import load_reservations
 from datetime import datetime
+
+from modules.helpers import show_reservation
+
+from modules.rooms import room_exists
+from modules.validations import (
+    custom_input,
+    validate_date,
+    validate_dni
+)
+
+from storage.json_storage import (
+    load_reservations
+)
+
+
+# ==========================================
+# MENÚ DE BÚSQUEDA
+# ==========================================
 
 def search_reservation():
 
@@ -13,22 +29,24 @@ def search_reservation():
         print("3. Buscar por Fecha")
         print("0. Volver")
 
-        option = custom_input("\nSeleccione una opción: ")
+        option = custom_input(
+            "\nSeleccione una opción: "
+        )
 
         if option == "1":
 
             search_by_dni()
-            break
+            return
 
         elif option == "2":
 
             search_by_room()
-            break
+            return
 
         elif option == "3":
 
             search_by_date()
-            break
+            return
 
         elif option == "0":
 
@@ -38,23 +56,10 @@ def search_reservation():
 
             print("Opción inválida.")
 
-def show_reservation(reservation):
 
-    print("-" * 40)
-
-    print(f"Cliente: {reservation['customer_name']}")
-    print(f"DNI: {reservation['customer_dni']}")
-    print(f"Teléfono: {reservation['customer_phone']}")
-
-    print(f"Habitación: {reservation['room_number']}")
-    print(f"Tipo: {reservation['room_type']}")
-
-    print(f"Check-in: {reservation['check_in']}")
-    print(f"Check-out: {reservation['check_out']}")
-
-    print(f"Huéspedes: {reservation['guest_count']}")
-
-    print(f"Total: S/ {reservation['total']}")
+# ==========================================
+# BUSCAR POR DNI
+# ==========================================
 
 def search_by_dni():
 
@@ -83,6 +88,11 @@ def search_by_dni():
 
         print("\nNo se encontraron reservas.")
 
+
+# ==========================================
+# BUSCAR POR HABITACIÓN
+# ==========================================
+
 def search_by_room():
 
     room_number = custom_input(
@@ -95,6 +105,11 @@ def search_by_room():
         return
 
     room_number = int(room_number)
+
+    if not room_exists(room_number):
+
+        print("La habitación no existe.")
+        return
 
     reservations = load_reservations()
 
@@ -110,7 +125,12 @@ def search_by_room():
 
     if not found:
 
-        print("\nNo se encontraron reservas.")
+        print("\nNo se encontraron reservas para esa habitación.")
+
+
+# ==========================================
+# BUSCAR POR FECHA
+# ==========================================
 
 def search_by_date():
 
@@ -144,7 +164,7 @@ def search_by_date():
             "%d/%m/%Y"
         )
 
-        if check_in <= search_date < check_out:
+        if check_in <= search_date <= check_out:
 
             show_reservation(reservation)
 

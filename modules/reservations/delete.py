@@ -1,26 +1,34 @@
+from modules.helpers import show_reservation
+
 from .update import select_reservation
-from storage.json_storage import save_reservations
 from modules.validations import custom_input
 
+from storage.json_storage import (
+    customer_has_reservations,
+    delete_customer,
+    save_reservations
+)
+
+
+# ==========================================
+# ELIMINAR RESERVA
+# ==========================================
 
 def delete_reservation():
 
     print("\n===== ELIMINAR RESERVA =====\n")
 
-    reservations, reservation_index, reservation = select_reservation()
+    reservations, reservation_index, reservation = (
+        select_reservation()
+    )
 
     if reservations is None:
 
         return
 
-    print("\n===== RESERVA SELECCIONADA =====\n")
+    print("\n===== RESERVA SELECCIONADA =====")
 
-    print(f"Cliente: {reservation['customer_name']}")
-    print(f"DNI: {reservation['customer_dni']}")
-    print(f"Habitación: {reservation['room_number']}")
-    print(f"Check-in: {reservation['check_in']}")
-    print(f"Check-out: {reservation['check_out']}")
-    print(f"Total: ${reservation['total']}")
+    show_reservation(reservation)
 
     while True:
 
@@ -40,8 +48,35 @@ def delete_reservation():
 
         return
 
+    customer_dni = reservation["customer_dni"]
+
     reservations.pop(reservation_index)
 
     save_reservations(reservations)
 
     print("\nReserva eliminada correctamente.")
+
+    # ==========================================
+    # ELIMINAR CLIENTE SI YA NO TIENE RESERVAS
+    # ==========================================
+
+    if not customer_has_reservations(customer_dni):
+
+        while True:
+
+            option = custom_input(
+                "\nEl cliente ya no tiene reservas.\n"
+                "¿Desea eliminar también al cliente? (s/n): "
+            ).lower()
+
+            if option in ["s", "n"]:
+
+                break
+
+            print("Opción inválida.")
+
+        if option == "s":
+
+            delete_customer(customer_dni)
+
+            print("Cliente eliminado correctamente.")

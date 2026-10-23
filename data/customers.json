@@ -3,5 +3,15 @@
         "customer_name": "pedro Olortegui",
         "customer_dni": "73812771",
         "customer_phone": "962314587"
+    },
+    {
+        "customer_name": "Alfonso Olortegui ",
+        "customer_dni": "95211565",
+        "customer_phone": "123456987"
+    },
+    {
+        "customer_name": "Pedro Mendieta",
+        "customer_dni": "73812777",
+        "customer_phone": "968574321"
     }
 ]

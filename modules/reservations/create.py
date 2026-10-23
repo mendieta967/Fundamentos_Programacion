@@ -251,11 +251,11 @@ def create_reservation():
 
     print(f"\nHabitación: {room_number}")
     print(f"Tipo: {room['type']}")
-    print(f"Precio por noche: S/ {room['price']}")
+    print(f"Precio por noche: S/ {room['price']:.2f}")
 
-    print(f"\nSubtotal: S/ {subtotal}")
-    print(f"IGV: S/ {igv}")
-    print(f"TOTAL: S/ {total}")
+    print(f"\nSubtotal: S/ {subtotal:.2f}")
+    print(f"IGV: S/ {igv:.2f}")
+    print(f"TOTAL: S/ {total:.2f}")
 
     print("\n¡Reserva realizada con éxito!")
 

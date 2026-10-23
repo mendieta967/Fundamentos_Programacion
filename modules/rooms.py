@@ -103,7 +103,7 @@ def show_available_rooms(people_count, check_in, check_out):
                 f"{room_number} - "
                 f"{room_data['type']} - "
                 f"Capacidad: {room_data['capacity']} - "
-                f"${room_data['price']}"
+                f"S/ {room_data['price']:.2f}"
             )
 
     if not found_room:
@@ -137,7 +137,8 @@ def is_room_available_for_dates(
     room_number,
     check_in,
     check_out,
-    ignore_index=None):
+    ignore_index=None
+):
 
     reservations = load_reservations()
 
@@ -179,6 +180,49 @@ def is_room_available_for_dates(
                 return False
 
     return True
+
+
+# ==========================================
+# OBTENER RESERVA ACTUAL DE UNA HABITACIÓN
+# ==========================================
+
+def get_room_current_reservation(room_number):
+
+    reservations = load_reservations()
+
+    today = datetime.today().replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0
+    )
+
+    for reservation in reservations:
+
+        if reservation["room_number"] != room_number:
+
+            continue
+
+        check_in = datetime.strptime(
+            reservation["check_in"],
+            "%d/%m/%Y"
+        )
+
+        check_out = datetime.strptime(
+            reservation["check_out"],
+            "%d/%m/%Y"
+        )
+
+        if check_in <= today <= check_out:
+
+            return reservation
+
+    return None
+
+
+# ==========================================
+# SELECCIONAR HABITACIÓN
+# ==========================================
 
 def select_room(
     guest_count,
