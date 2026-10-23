@@ -1,5 +1,6 @@
 from modules.reservations.menu import reservations_menu
 from modules.validations import custom_input
+from modules.clients.menu import clients_menu
 
 
 def main():
@@ -24,7 +25,7 @@ def main():
 
         elif option == "2":
 
-            print("Módulo en desarrollo.")
+            clients_menu()
 
         elif option == "3":
 

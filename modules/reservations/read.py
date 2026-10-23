@@ -3,7 +3,7 @@ from modules.validations import (
     validate_dni,
 )
 
-from .helpers import show_reservation
+from modules.helpers import show_reservation
 
 from storage.json_storage import load_reservations
 
