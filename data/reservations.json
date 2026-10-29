@@ -26,5 +26,61 @@
         "subtotal": 480,
         "igv": 86.39999999999999,
         "total": 566.4
+    },
+    {
+        "customer_dni": "73812777",
+        "check_in": "30/10/2026",
+        "check_out": "02/11/2026",
+        "nights": 3,
+        "guest_count": 2,
+        "room_number": 203,
+        "room_type": "Double",
+        "payment_method": "efectivo",
+        "receipt_type": "boleta",
+        "subtotal": 240,
+        "igv": 43.199999999999996,
+        "total": 283.2
+    },
+    {
+        "customer_dni": "73812774",
+        "check_in": "01/11/2026",
+        "check_out": "05/11/2026",
+        "nights": 4,
+        "guest_count": 4,
+        "room_number": 302,
+        "room_type": "Suite",
+        "payment_method": "tarjeta",
+        "receipt_type": "boleta",
+        "subtotal": 480,
+        "igv": 86.39999999999999,
+        "total": 566.4
+    },
+    {
+        "customer_dni": "12345678",
+        "check_in": "03/11/2026",
+        "check_out": "07/11/2026",
+        "nights": 4,
+        "guest_count": 2,
+        "room_number": 202,
+        "room_type": "Double",
+        "payment_method": "efectivo",
+        "receipt_type": "factura",
+        "subtotal": 320,
+        "igv": 57.599999999999994,
+        "total": 377.6
+    },
+    {
+        "customer_dni": "12369854",
+        "check_in": "10/11/2026",
+        "check_out": "15/11/2026",
+        "nights": 5,
+        "guest_count": 1,
+        "room_number": 101,
+        "room_type": "Simple",
+        "payment_method": "efectivo",
+        "receipt_type": "boleta",
+        "subtotal": 250,
+        "igv": 45.0,
+        "total": 295.0
     }
 ]

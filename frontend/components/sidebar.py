@@ -1,4 +1,8 @@
 from pathlib import Path
+from frontend.views.reservations import ReservationsView
+from frontend.views.customers import CustomersView
+from frontend.views.rooms import RoomsView
+from frontend.views.reports import ReportsView
 
 import customtkinter as ctk
 from PIL import Image
@@ -16,11 +20,13 @@ class Sidebar(ctk.CTkFrame):
             fg_color=SIDEBAR,
             corner_radius=0
         )
-
+        self.parent = parent
         self.grid_propagate(False)
 
-        self.load_images()
+        self.buttons = {}
+        self.active_button = None
 
+        self.load_images()
         self.create_widgets()
 
     # ==========================================
@@ -31,7 +37,10 @@ class Sidebar(ctk.CTkFrame):
 
         assets = Path(__file__).resolve().parents[1] / "assets"
 
+        # -------------------------
         # Logo
+        # -------------------------
+
         logo = Image.open(assets / "logo.png")
 
         self.logo = ctk.CTkImage(
@@ -40,30 +49,38 @@ class Sidebar(ctk.CTkFrame):
             size=(190, 70)
         )
 
+        # -------------------------
         # Iconos
+        # -------------------------
+
         self.icon_reserva = ctk.CTkImage(
-            Image.open(assets / "icons" / "icon_reserva.png"),
-            size=(20, 20)
+            light_image=Image.open(assets / "icons" / "icon_reserva.png"),
+            dark_image=Image.open(assets / "icons" / "icon_reserva.png"),
+            size=(22, 22)
         )
 
         self.icon_usuario = ctk.CTkImage(
-            Image.open(assets / "icons" / "icon_usuario.png"),
-            size=(20, 20)
+            light_image=Image.open(assets / "icons" / "icon_usuario.png"),
+            dark_image=Image.open(assets / "icons" / "icon_usuario.png"),
+            size=(22, 22)
         )
 
         self.icon_habitacion = ctk.CTkImage(
-            Image.open(assets / "icons" / "icon_habitacion.png"),
-            size=(20, 20)
+            light_image=Image.open(assets / "icons" / "icon_habitacion.png"),
+            dark_image=Image.open(assets / "icons" / "icon_habitacion.png"),
+            size=(22, 22)
         )
 
         self.icon_reporte = ctk.CTkImage(
-            Image.open(assets / "icons" / "icon_reporte.png"),
-            size=(20, 20)
+            light_image=Image.open(assets / "icons" / "icon_reporte.png"),
+            dark_image=Image.open(assets / "icons" / "icon_reporte.png"),
+            size=(22, 22)
         )
 
         self.icon_salir = ctk.CTkImage(
-            Image.open(assets / "icons" / "icon_salir.png"),
-            size=(18, 18)
+            light_image=Image.open(assets / "icons" / "icon_salir.png"),
+            dark_image=Image.open(assets / "icons" / "icon_salir.png"),
+            size=(20, 20)
         )
 
     # ==========================================
@@ -74,9 +91,9 @@ class Sidebar(ctk.CTkFrame):
 
         self.grid_columnconfigure(0, weight=1)
 
-        # -------------------------------
-        # LOGO
-        # -------------------------------
+        # -------------------------
+        # Logo
+        # -------------------------
 
         logo_label = ctk.CTkLabel(
             self,
@@ -87,87 +104,111 @@ class Sidebar(ctk.CTkFrame):
         logo_label.grid(
             row=0,
             column=0,
-            pady=(24, 20)
+            pady=(25, 18)
         )
 
-        ctk.CTkFrame(
+        # -------------------------
+        # Separador
+        # -------------------------
+
+        separator = ctk.CTkFrame(
             self,
-            height=1,
+            height=2,
             fg_color="#334155",
-            corner_radius=0
-        ).grid(
+            corner_radius=100
+        )
+
+        separator.grid(
             row=1,
             column=0,
-            padx=20,
-            pady=(0, 22),
+            padx=22,
+            pady=(0, 25),
             sticky="ew"
         )
 
-        # -------------------------------
-        # BOTONES
-        # -------------------------------
+        # -------------------------
+        # Menú
+        # -------------------------
 
         self.create_button(
+            "reservas",
             "Gestión de Reservas",
             self.icon_reserva,
-            2
+            2,
+            ReservationsView
         )
 
         self.create_button(
+            "clientes",
             "Gestión de Clientes",
             self.icon_usuario,
-            3
+            3,
+            CustomersView
         )
 
         self.create_button(
+            "habitaciones",
             "Gestión de Habitaciones",
             self.icon_habitacion,
-            4
+            4,
+            RoomsView
         )
 
         self.create_button(
+            "reportes",
             "Reportes",
             self.icon_reporte,
-            5
+            5,
+            ReportsView
         )
+
+        # Marca el primero como activo
+
+        self.change_view("reservas", ReservationsView)
+
+        # Empuja el botón salir abajo
 
         self.grid_rowconfigure(6, weight=1)
 
-        # -------------------------------
-        # BOTÓN SALIR
-        # -------------------------------
+        # -------------------------
+        # Botón salir
+        # -------------------------
 
         exit_button = ctk.CTkButton(
             self,
             text="Salir",
             image=self.icon_salir,
             compound="left",
-            fg_color="#DC2626",
-            hover_color="#B91C1C",
-            height=46,
-            corner_radius=10,
-            font=("Segoe UI", 15, "bold"),
+            height=52,
+            fg_color=DANGER,
+            hover_color="#DC2626",
             text_color="white",
-            cursor="hand2"
+            font=("Segoe UI", 15, "bold"),
+            corner_radius=12,
+            border_spacing=14,
+            cursor="hand2",
+            command=self.master.destroy
         )
 
         exit_button.grid(
             row=7,
             column=0,
-            padx=16,
-            pady=18,
+            padx=18,
+            pady=20,
             sticky="ew"
         )
 
     # ==========================================
-    # BOTONES
+    # CREAR BOTÓN
     # ==========================================
 
     def create_button(
         self,
+        key,
         text,
         image,
-        row
+        row,
+        view
     ):
 
         button = ctk.CTkButton(
@@ -176,20 +217,55 @@ class Sidebar(ctk.CTkFrame):
             image=image,
             compound="left",
             anchor="w",
-            height=46,
+            height=52,
             fg_color="transparent",
             hover_color="#334155",
             text_color="white",
-            font=("Segoe UI", 13, "bold"),
-            corner_radius=10,
-            border_spacing=10,
-            cursor="hand2"
+            font=("Segoe UI", 14, "bold"),
+            corner_radius=12,
+            border_spacing=18,
+            cursor="hand2",
+            command=lambda k=key, v=view: self.change_view(k, v)
         )
 
         button.grid(
             row=row,
             column=0,
-            padx=16,
-            pady=4,
+            padx=18,
+            pady=6,
             sticky="ew"
         )
+
+        self.buttons[key] = button
+
+    # ==========================================
+    # BOTÓN ACTIVO
+    # ==========================================
+
+    def set_active(self, key):
+
+        for name, button in self.buttons.items():
+
+            if name == key:
+
+                button.configure(
+                    fg_color=PRIMARY,
+                    hover_color=PRIMARY,
+                    text_color="white"
+                )
+
+                self.active_button = button
+
+            else:
+
+                button.configure(
+                    fg_color="transparent",
+                    hover_color="#334155",
+                    text_color="white"
+                )
+    
+    def change_view(self, key, view):
+
+        self.set_active(key)
+
+        self.parent.show_view(view)

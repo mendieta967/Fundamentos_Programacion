@@ -1,6 +1,7 @@
 import customtkinter as ctk
 
 from frontend.components.sidebar import Sidebar
+
 from frontend.styles import *
 
 
@@ -23,6 +24,7 @@ class App(ctk.CTk):
         super().__init__()
 
         self.configure_window()
+
         self.create_layout()
 
     # ==========================================
@@ -38,32 +40,20 @@ class App(ctk.CTk):
         self.minsize(1000, 650)
 
     # ==========================================
-    # LAYOUT
+    # CREAR LAYOUT
     # ==========================================
 
     def create_layout(self):
 
-        # La columna del contenido ocupa el espacio restante
+        # La columna derecha ocupa todo el espacio
         self.grid_columnconfigure(1, weight=1)
 
         # La fila ocupa toda la ventana
         self.grid_rowconfigure(0, weight=1)
 
-        # ==========================
-        # SIDEBAR
-        # ==========================
-
-        self.sidebar = Sidebar(self)
-
-        self.sidebar.grid(
-            row=0,
-            column=0,
-            sticky="ns"
-        )
-
-        # ==========================
+        # ==========================================
         # CONTENIDO
-        # ==========================
+        # ==========================================
 
         self.content = ctk.CTkFrame(
             self,
@@ -76,3 +66,47 @@ class App(ctk.CTk):
             column=1,
             sticky="nsew"
         )
+
+        # Vista actual
+
+        self.current_view = None
+
+        # ==========================================
+        # SIDEBAR
+        # ==========================================
+
+        self.sidebar = Sidebar(self)
+
+        self.sidebar.grid(
+            row=0,
+            column=0,
+            sticky="ns"
+        )
+
+    # ==========================================
+    # CAMBIAR VISTA
+    # ==========================================
+
+    def show_view(self, view_class):
+
+        if self.current_view is not None:
+
+            self.current_view.destroy()
+
+        self.current_view = view_class(self.content)
+
+        self.current_view.pack(
+            fill="both",
+            expand=True
+        )
+
+
+# ==========================================
+# EJECUTAR
+# ==========================================
+
+if __name__ == "__main__":
+
+    app = App()
+
+    app.mainloop()
