@@ -13,5 +13,20 @@
         "customer_name": "Pedro Mendieta",
         "customer_dni": "73812777",
         "customer_phone": "968574321"
+    },
+    {
+        "customer_name": "Brisa Soriano",
+        "customer_dni": "73812774",
+        "customer_phone": "123654968"
+    },
+    {
+        "customer_name": "Juan Perez",
+        "customer_dni": "12345678",
+        "customer_phone": "123698547"
+    },
+    {
+        "customer_name": "Juan pepo",
+        "customer_dni": "12369854",
+        "customer_phone": "698754132"
     }
 ]

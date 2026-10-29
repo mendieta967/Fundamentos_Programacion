@@ -279,3 +279,40 @@ def select_room(
             continue
 
         return room_number, room
+
+# ==========================================
+# OBTENER HABITACIONES DISPONIBLES
+# ==========================================
+
+def get_available_rooms(
+    guest_count,
+    check_in,
+    check_out,
+    ignore_index=None
+):
+
+    available_rooms = []
+
+    for room_number, room in rooms.items():
+
+        if room["capacity"] < guest_count:
+            continue
+
+        if not is_room_available_for_dates(
+            room_number,
+            check_in,
+            check_out,
+            ignore_index
+        ):
+            continue
+
+        available_rooms.append(
+            {
+                "number": room_number,
+                "type": room["type"],
+                "capacity": room["capacity"],
+                "price": room["price"]
+            }
+        )
+
+    return available_rooms
