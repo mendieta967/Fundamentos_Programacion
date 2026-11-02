@@ -5,9 +5,14 @@ from datetime import datetime
 import customtkinter as ctk
 from PIL import Image
 
-from storage.json_storage import load_customers, load_reservations
+from storage.json_storage import (
+    get_customer_by_dni,
+    load_customers,
+    load_reservations
+)
 from frontend.dialogs.new_reservation import NewReservationDialog
 from frontend.dialogs.edit_reservation import EditReservationDialog
+from frontend.dialogs.reservation_details import ReservationDetailsDialog
 from frontend.dialogs.search_reservation import SearchReservationDialog
 from frontend.validators.search_validator import SearchValidator
 from frontend.components.services.reservation_service import (
@@ -15,6 +20,7 @@ from frontend.components.services.reservation_service import (
     restore_reservation
 )
 from modules.reservation_status import is_reservation_cancelled
+from frontend.pdf.receipt_pdf import generate_receipt, print_receipt
 
 class ReservationsView(ctk.CTkFrame):
 
@@ -235,7 +241,7 @@ class ReservationsView(ctk.CTkFrame):
             ("Check In", 120),
             ("Check Out", 120),
             ("Estado", 100),
-            ("Acciones", 160)
+            ("Acciones", 260)
 
         ]
 
@@ -365,14 +371,10 @@ class ReservationsView(ctk.CTkFrame):
         )
         status_label.pack(side="left")
 
-        # -------------------------
-        # EDITAR
-        # -------------------------
-
         actions_cell = ctk.CTkFrame(
             row,
             fg_color="transparent",
-            width=160,
+            width=260,
             height=34
         )
         actions_cell.pack(
@@ -381,27 +383,50 @@ class ReservationsView(ctk.CTkFrame):
         )
         actions_cell.pack_propagate(False)
 
-        edit_button = ctk.CTkButton(
+        ctk.CTkButton(
             actions_cell,
-            text="",
-            image=self.icon_edit,
-            width=36,
+            text="Ver",
+            width=44,
             height=34,
-            fg_color="#2563EB",
-            hover_color="#1D4ED8",
+            fg_color="#475569",
+            hover_color="#334155",
             corner_radius=8,
             cursor="hand2",
-            command=lambda: self.open_edit_reservation(
-                reservation_index,
+            command=lambda: self.open_reservation_details(
                 reservation,
-                restore_first=is_cancelled
+                estado
             )
-        )
+        ).pack(side="left", padx=(2, 4))
 
-        edit_button.pack(
-            side="left",
-            padx=(5, 4)
-        )
+        ctk.CTkButton(
+            actions_cell,
+            text="Imprimir",
+            width=68,
+            height=34,
+            fg_color="#0F766E",
+            hover_color="#115E59",
+            corner_radius=8,
+            cursor="hand2",
+            command=lambda: self.print_reservation(reservation, estado)
+        ).pack(side="left", padx=4)
+
+        if estado != "Finalizada":
+            ctk.CTkButton(
+                actions_cell,
+                text="",
+                image=self.icon_edit,
+                width=36,
+                height=34,
+                fg_color="#2563EB",
+                hover_color="#1D4ED8",
+                corner_radius=8,
+                cursor="hand2",
+                command=lambda: self.open_edit_reservation(
+                    reservation_index,
+                    reservation,
+                    restore_first=is_cancelled
+                )
+            ).pack(side="left", padx=4)
 
         if is_cancelled:
             ctk.CTkButton(
@@ -418,7 +443,7 @@ class ReservationsView(ctk.CTkFrame):
                     reservation
                 )
             ).pack(side="left", padx=(4, 0))
-        else:
+        elif estado != "Finalizada":
             ctk.CTkButton(
                 actions_cell,
                 text="",
@@ -483,6 +508,55 @@ class ReservationsView(ctk.CTkFrame):
             reservation,
             on_saved=self.refresh_table
         )
+
+    def open_reservation_details(self, reservation, status):
+        customer = get_customer_by_dni(reservation["customer_dni"]) or {}
+        ReservationDetailsDialog(
+            self,
+            reservation,
+            customer,
+            status
+        )
+
+    def print_reservation(self, reservation, status):
+        customer = get_customer_by_dni(reservation["customer_dni"])
+        if customer is None:
+            messagebox.showerror(
+                title="Cliente no encontrado",
+                message=(
+                    "No se puede generar el comprobante porque no se "
+                    "encontraron los datos del cliente."
+                ),
+                parent=self
+            )
+            return
+
+        try:
+            printable_reservation = dict(reservation)
+            printable_reservation["display_status"] = status
+            receipt_path = generate_receipt(
+                printable_reservation,
+                customer
+            )
+            print_requested = print_receipt(receipt_path)
+        except OSError as error:
+            messagebox.showerror(
+                title="No se pudo imprimir",
+                message=f"No se pudo generar o abrir el comprobante: {error}",
+                parent=self
+            )
+            return
+
+        if not print_requested:
+            messagebox.showinfo(
+                title="Comprobante abierto",
+                message=(
+                    "Windows no tiene una acción de impresión asociada "
+                    "al visor PDF. Se abrió el comprobante; imprimilo "
+                    "desde esa aplicación."
+                ),
+                parent=self
+            )
 
     def _confirm_restore_for_edit(self, reservation):
         dialog = ctk.CTkToplevel(self)

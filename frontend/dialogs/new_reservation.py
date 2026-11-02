@@ -467,7 +467,7 @@ class NewReservationDialog(NewReservationWidgets, ctk.CTkToplevel):
 
         ctk.CTkLabel(
             receipt_dialog,
-            text="El comprobante PDF está listo para imprimir.",
+            text="Se abrirá el comprobante para imprimirlo desde el visor PDF.",
             font=("Segoe UI", 12),
             text_color="#64748B"
         ).pack(pady=(0, 18))
@@ -503,10 +503,22 @@ class NewReservationDialog(NewReservationWidgets, ctk.CTkToplevel):
     def print_receipt_file(receipt_path, parent):
 
         try:
-            print_receipt(receipt_path)
+            print_requested = print_receipt(receipt_path)
         except OSError as error:
             messagebox.showerror(
                 title="Error al imprimir",
-                message=f"No se pudo imprimir el comprobante: {error}",
+                message=f"No se pudo abrir o imprimir el comprobante: {error}",
+                parent=parent
+            )
+            return
+
+        if not print_requested:
+            messagebox.showinfo(
+                title="Comprobante abierto",
+                message=(
+                    "Windows no tiene una acción de impresión asociada "
+                    "al visor PDF. Imprimí el comprobante desde esa "
+                    "aplicación."
+                ),
                 parent=parent
             )
