@@ -1,6 +1,7 @@
 from modules.payments import calculate_igv, calculate_subtotal, calculate_total
 from modules.reservation_status import cancel_reservation, restore_reservation
 from modules.validations import calculate_nights
+from frontend.components.services.customer_service import CustomerService
 from storage.json_storage import (
     get_customer_by_dni,
     load_customers,
@@ -41,7 +42,16 @@ def build_reservation_data(
 
 def persist_reservation(customer, reservation):
     customer_dni = reservation["customer_dni"]
-    if get_customer_by_dni(customer_dni) is None:
+    existing_customer = get_customer_by_dni(customer_dni)
+    if existing_customer is not None and not CustomerService.is_active(
+        existing_customer
+    ):
+        raise ValueError(
+            "El cliente está dado de baja. Restauralo antes de crear "
+            "una nueva reserva."
+        )
+
+    if existing_customer is None:
         customers = load_customers()
         customers.append(customer)
         save_customers(customers)

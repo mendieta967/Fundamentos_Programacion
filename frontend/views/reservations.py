@@ -1,10 +1,9 @@
 from tkinter import messagebox
-from pathlib import Path
 from datetime import datetime
 
 import customtkinter as ctk
-from PIL import Image
 
+from frontend.utils.icons import load_icon
 from storage.json_storage import (
     get_customer_by_dni,
     load_customers,
@@ -30,41 +29,12 @@ class ReservationsView(ctk.CTkFrame):
 
         self.configure(fg_color="#F8FAFC")
 
-        self.load_images()
+        self.icon_search = load_icon("icon_search")
+        self.icon_add = load_icon("icon_add")
+        self.icon_edit = load_icon("icon_edit")
+        self.icon_delete = load_icon("icon_delete")
 
         self.create_widgets()
-
-    # =====================================================
-    # CARGAR ICONOS
-    # =====================================================
-
-    def load_images(self):
-
-        assets = Path(__file__).resolve().parents[1] / "assets" / "icons"
-
-        self.icon_search = ctk.CTkImage(
-            light_image=Image.open(assets / "icon_search.png"),
-            dark_image=Image.open(assets / "icon_search.png"),
-            size=(18, 18)
-        )
-
-        self.icon_add = ctk.CTkImage(
-            light_image=Image.open(assets / "icon_add.png"),
-            dark_image=Image.open(assets / "icon_add.png"),
-            size=(18, 18)
-        )
-
-        self.icon_edit = ctk.CTkImage(
-            light_image=Image.open(assets / "icon_edit.png"),
-            dark_image=Image.open(assets / "icon_edit.png"),
-            size=(18, 18)
-        )
-
-        self.icon_delete = ctk.CTkImage(
-            light_image=Image.open(assets / "icon_delete.png"),
-            dark_image=Image.open(assets / "icon_delete.png"),
-            size=(18, 18)
-        )
 
     # =====================================================
     # COMPONENTES

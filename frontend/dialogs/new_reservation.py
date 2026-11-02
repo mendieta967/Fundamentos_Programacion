@@ -14,6 +14,7 @@ from frontend.components.services.reservation_service import (
     build_reservation_data,
     persist_reservation
 )
+from frontend.components.services.customer_service import CustomerService
 
 class NewReservationDialog(NewReservationWidgets, ctk.CTkToplevel):
 
@@ -45,6 +46,12 @@ class NewReservationDialog(NewReservationWidgets, ctk.CTkToplevel):
         self.form_reservation.pack_forget()
 
         if customer:
+            if not CustomerService.is_active(customer):
+                self.message_label.configure(
+                    text="Cliente dado de baja. Restauralo antes de crear reservas.",
+                    text_color="#EF4444"
+                )
+                return
 
             self.message_label.configure(
                 text="✅ Cliente registrado",
@@ -345,6 +352,17 @@ class NewReservationDialog(NewReservationWidgets, ctk.CTkToplevel):
             return
 
         customer = get_customer_by_dni(customer_dni)
+        if customer is not None and not CustomerService.is_active(customer):
+            messagebox.showwarning(
+                title="Cliente dado de baja",
+                message=(
+                    "Restaurá el cliente desde la sección Clientes antes "
+                    "de crear una nueva reserva."
+                ),
+                parent=self
+            )
+            return
+
         if customer is None:
             name_valid, name_message = self.validator.validate_name_field(
                 self.entry_name.get().strip()
@@ -421,7 +439,7 @@ class NewReservationDialog(NewReservationWidgets, ctk.CTkToplevel):
 
         try:
             persist_reservation(customer, reservation)
-        except OSError as error:
+        except (OSError, ValueError) as error:
             messagebox.showerror(
                 title="Error al guardar",
                 message=f"No se pudo guardar la reserva: {error}",
