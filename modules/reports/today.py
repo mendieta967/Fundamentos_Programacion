@@ -5,6 +5,7 @@ from modules.helpers import show_reservation
 from storage.json_storage import (
     load_reservations
 )
+from modules.reservation_status import is_reservation_cancelled
 
 
 def today_reservations():
@@ -20,6 +21,9 @@ def today_reservations():
     has_reservations = False
 
     for reservation in reservations:
+
+        if is_reservation_cancelled(reservation):
+            continue
 
         if reservation["check_in"] == today:
 

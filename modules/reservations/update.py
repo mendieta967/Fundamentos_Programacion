@@ -26,6 +26,7 @@ from storage.json_storage import (
     save_customers,
     save_reservations
 )
+from modules.reservation_status import is_reservation_cancelled
 
 
 # ==========================================
@@ -49,7 +50,10 @@ def select_reservation():
 
     for index, reservation in enumerate(reservations):
 
-        if reservation["customer_dni"] == customer_dni:
+        if (
+            reservation["customer_dni"] == customer_dni
+            and not is_reservation_cancelled(reservation)
+        ):
 
             customer_reservations.append(
                 (index, reservation)

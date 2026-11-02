@@ -1,17 +1,18 @@
 [
     {
         "customer_dni": "95211565",
-        "check_in": "25/10/2026",
-        "check_out": "30/10/2026",
-        "nights": 5,
+        "check_in": "03/11/2026",
+        "check_out": "05/11/2026",
+        "nights": 2,
         "guest_count": 4,
         "room_number": 303,
         "room_type": "Suite",
         "payment_method": "efectivo",
         "receipt_type": "factura",
-        "subtotal": 600,
-        "igv": 108.0,
-        "total": 708.0
+        "subtotal": 240,
+        "igv": 43.199999999999996,
+        "total": 283.2,
+        "status": "cancelled"
     },
     {
         "customer_dni": "73812777",
@@ -82,5 +83,19 @@
         "subtotal": 250,
         "igv": 45.0,
         "total": 295.0
+    },
+    {
+        "customer_dni": "73812778",
+        "check_in": "03/11/2026",
+        "check_out": "05/11/2026",
+        "nights": 2,
+        "guest_count": 2,
+        "room_number": 203,
+        "room_type": "Double",
+        "payment_method": "efectivo",
+        "receipt_type": "boleta",
+        "subtotal": 160,
+        "igv": 28.799999999999997,
+        "total": 188.8
     }
 ]

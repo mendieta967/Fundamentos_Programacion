@@ -1,21 +1,21 @@
+from datetime import date, datetime
 import customtkinter as ctk
 from tkinter import messagebox
+from tkcalendar import Calendar
 
 from frontend.styles import PRIMARY, TEXT
-from storage.json_storage import (
-    get_customer_by_dni,
-    load_customers,
-    load_reservations,
-    save_customers,
-    save_reservations
-)
-from frontend.components.validators.reservation_validator import ReservationValidator
+from storage.json_storage import get_customer_by_dni
+from frontend.validators.reservation_validator import ReservationValidator
 from modules.rooms import get_available_rooms
-from modules.payments import calculate_igv, calculate_subtotal, calculate_total
-from modules.validations import calculate_nights, validate_dni
-from frontend.receipt_pdf import generate_receipt, print_receipt
+from modules.validations import validate_dni
+from frontend.pdf.receipt_pdf import generate_receipt, print_receipt
+from frontend.dialogs.new_reservation_widgets import NewReservationWidgets
+from frontend.components.services.reservation_service import (
+    build_reservation_data,
+    persist_reservation
+)
 
-class NewReservationDialog(ctk.CTkToplevel):
+class NewReservationDialog(NewReservationWidgets, ctk.CTkToplevel):
 
     def __init__(self, parent, on_reservation_created=None):
 
@@ -30,511 +30,6 @@ class NewReservationDialog(ctk.CTkToplevel):
         self.validator = ReservationValidator()
         self.on_reservation_created = on_reservation_created
         self.create_widgets()
-
-    # =====================================================
-    # COMPONENTES
-    # =====================================================
-
-    def create_widgets(self):
-
-        # ==========================
-        # TÍTULO
-        # ==========================
-
-        title = ctk.CTkLabel(
-            self,
-            text="Nueva Reserva",
-            font=("Segoe UI", 25, "bold"),
-            text_color=TEXT
-        )
-
-        title.pack(
-            pady=(22, 4)
-        )
-
-        subtitle = ctk.CTkLabel(
-            self,
-            text="Ingresá los datos para gestionar la reserva",
-            font=("Segoe UI", 13),
-            text_color="#64748B"
-        )
-
-        subtitle.pack(
-            pady=(0, 18)
-        )
-
-        # ==========================
-        # FORMULARIO
-        # ==========================
-
-        form = ctk.CTkScrollableFrame(
-            self,
-            fg_color="white",
-            corner_radius=14,
-            border_width=1,
-            border_color="#E2E8F0",
-            scrollbar_fg_color="#F1F5F9",
-            scrollbar_button_color="#CBD5E1",
-            scrollbar_button_hover_color="#94A3B8"
-        )
-
-        form.pack(
-            fill="both",
-            expand=True,
-            padx=24,
-            pady=(0, 24)
-        )
-
-        # ==========================
-        # DNI
-        # ==========================
-
-        dni_label = ctk.CTkLabel(
-            form,
-            text="DNI",
-            font=("Segoe UI", 13, "bold"),
-            text_color=TEXT
-        )
-
-        dni_label.pack(
-            anchor="w",
-            padx=18,
-            pady=(18, 0)
-        )
-
-        self.entry_dni = ctk.CTkEntry(
-            form,
-            height=42,
-            corner_radius=8,
-            border_width=1,
-            border_color="#CBD5E1",
-            fg_color="#F8FAFC",
-            text_color=TEXT,
-            placeholder_text="Ingresá el DNI del cliente"
-        )
-
-        self.entry_dni.pack(
-            fill="x",
-            padx=18,
-            pady=(6, 2)
-        )
-
-        self.dni_error = ctk.CTkLabel(
-            form,
-            text="",
-            font=("Segoe UI", 11),
-            text_color="#EF4444"
-        )
-        self.dni_error.pack(
-            anchor="w",
-            padx=18,
-            pady=(0, 12)
-        )
-
-        # ==========================
-        # BOTÓN BUSCAR
-        # ==========================
-
-        search_button = ctk.CTkButton(
-            form,
-            text="Buscar",
-            height=42,
-            corner_radius=8,
-            font=("Segoe UI", 14, "bold"),
-            fg_color=PRIMARY,
-            hover_color="#1D4ED8",
-            command=self.search_customer
-        )
-
-        search_button.pack(
-            fill="x",
-            padx=18,
-            pady=(0, 16)
-        )
-
-        # ==========================
-        # MENSAJE
-        # ==========================
-
-        self.message_label = ctk.CTkLabel(
-            form,
-            text="",
-            font=("Segoe UI", 13, "bold"),
-            text_color="#64748B"
-        )
-
-        self.message_label.pack(
-            anchor="w",
-            padx=18
-        )
-
-        self.form_reservation = ctk.CTkFrame(
-            form,
-            fg_color="#F8FAFC",
-            corner_radius=12,
-            border_width=1,
-            border_color="#E2E8F0"
-        )
-
-        ctk.CTkLabel(
-            self.form_reservation,
-            text="Datos de la reserva",
-            font=("Segoe UI", 15, "bold"),
-            text_color=TEXT
-        ).pack(
-            anchor="w",
-            padx=16,
-            pady=(14, 8)
-        )
-
-        ctk.CTkLabel(
-            self.form_reservation,
-            text="Check In",
-            font=("Segoe UI", 12, "bold"),
-            text_color="#334155"
-        ).pack(anchor="w", padx=16)
-
-        self.entry_checkin = ctk.CTkEntry(
-            self.form_reservation,
-            height=40,
-            placeholder_text="dd/mm/yyyy",
-            corner_radius=8,
-            border_width=1,
-            border_color="#CBD5E1",
-            fg_color="white",
-            text_color=TEXT
-        )
-        self.entry_checkin.pack(
-            fill="x",
-            padx=16,
-            pady=(5, 2)
-        )
-        self.checkin_error = ctk.CTkLabel(
-            self.form_reservation,
-            text="",
-            font=("Segoe UI", 11),
-            text_color="#EF4444"
-        )
-        self.checkin_error.pack(
-            anchor="w",
-            padx=16,
-            pady=(0, 12)
-        )
-
-        ctk.CTkLabel(
-            self.form_reservation,
-            text="Check Out",
-            font=("Segoe UI", 12, "bold"),
-            text_color="#334155"
-        ).pack(anchor="w", padx=16)
-
-        self.entry_checkout = ctk.CTkEntry(
-            self.form_reservation,
-            height=40,
-            placeholder_text="dd/mm/yyyy",
-            corner_radius=8,
-            border_width=1,
-            border_color="#CBD5E1",
-            fg_color="white",
-            text_color=TEXT
-        )
-        self.entry_checkout.pack(
-            fill="x",
-            padx=16,
-            pady=(5, 2)
-        )
-        self.checkout_error = ctk.CTkLabel(
-            self.form_reservation,
-            text="",
-            font=("Segoe UI", 11),
-            text_color="#EF4444"
-        )
-        self.checkout_error.pack(
-            anchor="w",
-            padx=16,
-            pady=(0, 12)
-        )
-
-        ctk.CTkLabel(
-            self.form_reservation,
-            text="Cantidad de huéspedes",
-            font=("Segoe UI", 12, "bold"),
-            text_color="#334155"
-        ).pack(anchor="w", padx=16)
-
-        self.entry_guests = ctk.CTkEntry(
-            self.form_reservation,
-            height=40,
-            corner_radius=8,
-            border_width=1,
-            border_color="#CBD5E1",
-            fg_color="white",
-            text_color=TEXT,
-            placeholder_text="Ej.: 2"
-        )
-        self.entry_guests.pack(
-            fill="x",
-            padx=16,
-            pady=(5, 2)
-        )
-        self.guests_error = ctk.CTkLabel(
-            self.form_reservation,
-            text="",
-            font=("Segoe UI", 11),
-            text_color="#EF4444"
-        )
-        self.guests_error.pack(
-            anchor="w",
-            padx=16,
-            pady=(0, 12)
-        )
-
-        self.continue_button = ctk.CTkButton(
-            self.form_reservation,
-            text="Continuar",
-            height=42,
-            corner_radius=8,
-            font=("Segoe UI", 14, "bold"),
-            fg_color=PRIMARY,
-            hover_color="#1D4ED8",
-            command=self.continue_reservation
-        )
-        self.continue_button.pack(
-            fill="x",
-            padx=16,
-            pady=(0, 16)
-        )
-
-        self.available_rooms_frame = ctk.CTkFrame(
-            self.form_reservation,
-            fg_color="white",
-            corner_radius=10,
-            border_width=1,
-            border_color="#E2E8F0"
-        )
-
-        ctk.CTkLabel(
-            self.available_rooms_frame,
-            text="Habitaciones disponibles",
-            font=("Segoe UI", 15, "bold"),
-            text_color=TEXT
-        ).pack(
-            anchor="w",
-            padx=14,
-            pady=(14, 8)
-        )
-
-        self.room_options_frame = ctk.CTkFrame(
-            self.available_rooms_frame,
-            fg_color="transparent"
-        )
-        self.room_options_frame.pack(
-            fill="x",
-            padx=12
-        )
-
-        self.room_choice = ctk.IntVar(value=0)
-
-        self.room_selection_error = ctk.CTkLabel(
-            self.available_rooms_frame,
-            text="",
-            font=("Segoe UI", 11),
-            text_color="#EF4444"
-        )
-        self.room_selection_error.pack(
-            anchor="w",
-            padx=14,
-            pady=(4, 0)
-        )
-
-        self.select_room_button = ctk.CTkButton(
-            self.available_rooms_frame,
-            text="Seleccionar habitación",
-            height=42,
-            corner_radius=8,
-            font=("Segoe UI", 14, "bold"),
-            fg_color=PRIMARY,
-            hover_color="#1D4ED8",
-            command=self.select_room
-        )
-        self.select_room_button.pack(
-            fill="x",
-            padx=14,
-            pady=(8, 14)
-        )
-
-        self.payment_form = ctk.CTkFrame(
-            self.form_reservation,
-            fg_color="#F8FAFC",
-            corner_radius=12,
-            border_width=1,
-            border_color="#E2E8F0"
-        )
-
-        ctk.CTkLabel(
-            self.payment_form,
-            text="Método de pago",
-            font=("Segoe UI", 14, "bold"),
-            text_color=TEXT
-        ).pack(
-            anchor="w",
-            padx=16,
-            pady=(14, 6)
-        )
-
-        self.payment_method = ctk.StringVar(value="")
-        for method in ("Efectivo", "Tarjeta"):
-            ctk.CTkRadioButton(
-                self.payment_form,
-                text=method,
-                variable=self.payment_method,
-                value=method,
-                font=("Segoe UI", 12),
-                text_color=TEXT,
-                fg_color=PRIMARY,
-                hover_color="#1D4ED8"
-            ).pack(
-                anchor="w",
-                padx=18,
-                pady=4
-            )
-
-        ctk.CTkLabel(
-            self.payment_form,
-            text="Tipo de comprobante",
-            font=("Segoe UI", 14, "bold"),
-            text_color=TEXT
-        ).pack(
-            anchor="w",
-            padx=16,
-            pady=(14, 6)
-        )
-
-        self.receipt_type = ctk.StringVar(value="")
-        for receipt in ("Boleta", "Factura"):
-            ctk.CTkRadioButton(
-                self.payment_form,
-                text=receipt,
-                variable=self.receipt_type,
-                value=receipt,
-                font=("Segoe UI", 12),
-                text_color=TEXT,
-                fg_color=PRIMARY,
-                hover_color="#1D4ED8"
-            ).pack(
-                anchor="w",
-                padx=18,
-                pady=4
-            )
-
-        self.confirm_reservation_button = ctk.CTkButton(
-            self.payment_form,
-            text="Confirmar reserva",
-            height=42,
-            corner_radius=8,
-            font=("Segoe UI", 14, "bold"),
-            fg_color=PRIMARY,
-            hover_color="#1D4ED8",
-            command=self.confirm_reservation
-        )
-        self.confirm_reservation_button.pack(
-            fill="x",
-            padx=16,
-            pady=(16, 16)
-        )
-
-        self.form_customer = ctk.CTkFrame(
-            form,
-            fg_color="#F8FAFC",
-            corner_radius=12,
-            border_width=1,
-            border_color="#E2E8F0"
-        )
-
-        ctk.CTkLabel(
-            self.form_customer,
-            text="Datos del cliente",
-            font=("Segoe UI", 15, "bold"),
-            text_color=TEXT
-        ).pack(
-            anchor="w",
-            padx=16,
-            pady=(14, 8)
-        )
-
-        ctk.CTkLabel(
-            self.form_customer,
-            text="Nombre",
-            font=("Segoe UI", 12, "bold"),
-            text_color="#334155"
-        ).pack(anchor="w", padx=16)
-
-        self.entry_name = ctk.CTkEntry(
-            self.form_customer,
-            height=40,
-            corner_radius=8,
-            border_width=1,
-            border_color="#CBD5E1",
-            fg_color="white",
-            text_color=TEXT,
-            placeholder_text="Nombre y apellido"
-        )
-        self.entry_name.pack(
-            fill="x",
-            padx=16,
-            pady=(5, 2)
-        )
-        self.name_error = ctk.CTkLabel(
-            self.form_customer,
-            text="",
-            font=("Segoe UI", 11),
-            text_color="#EF4444"
-        )
-        self.name_error.pack(
-            anchor="w",
-            padx=16,
-            pady=(0, 12)
-        )
-
-        ctk.CTkLabel(
-            self.form_customer,
-            text="Teléfono",
-            font=("Segoe UI", 12, "bold"),
-            text_color="#334155"
-        ).pack(anchor="w", padx=16)
-
-        self.entry_phone = ctk.CTkEntry(
-            self.form_customer,
-            height=40,
-            corner_radius=8,
-            border_width=1,
-            border_color="#CBD5E1",
-            fg_color="white",
-            text_color=TEXT,
-            placeholder_text="Ingresá un teléfono de contacto"
-        )
-        self.entry_phone.pack(
-            fill="x",
-            padx=16,
-            pady=(5, 2)
-        )
-        self.phone_error = ctk.CTkLabel(
-            self.form_customer,
-            text="",
-            font=("Segoe UI", 11),
-            text_color="#EF4444"
-        )
-        self.phone_error.pack(
-            anchor="w",
-            padx=16,
-            pady=(0, 12)
-        )
-
-        self.entry_name.bind("<KeyRelease>", self.validate_name)
-        self.entry_phone.bind("<KeyRelease>", self.validate_phone)
-        self.entry_checkin.bind("<KeyRelease>", self.validate_checkin)
-        self.entry_checkout.bind("<KeyRelease>", self.validate_checkout)
-        self.entry_guests.bind("<KeyRelease>", self.validate_guests)
 
     # =====================================================
     # BUSCAR CLIENTE
@@ -614,6 +109,70 @@ class NewReservationDialog(ctk.CTkToplevel):
             self.entry_guests.get()
         )
         self.guests_error.configure(text="" if valid else message)
+
+    def open_date_picker(self, entry, validate_callback, field_name):
+        try:
+            selected_date = datetime.strptime(
+                entry.get().strip(),
+                "%d/%m/%Y"
+            ).date()
+        except ValueError:
+            selected_date = date.today()
+
+        picker = ctk.CTkToplevel(self)
+        picker.title(f"Seleccionar {field_name}")
+        picker.resizable(False, False)
+        picker.transient(self)
+        picker.configure(fg_color="#F1F5F9")
+
+        calendar = Calendar(
+            picker,
+            selectmode="day",
+            year=selected_date.year,
+            month=selected_date.month,
+            day=selected_date.day,
+            date_pattern="dd/mm/yyyy",
+            locale="es_PE",
+            background="white",
+            foreground="#0F172A",
+            headersbackground="#E2E8F0",
+            headersforeground="#334155",
+            selectbackground=PRIMARY,
+            selectforeground="white",
+            normalbackground="white",
+            normalforeground="#0F172A",
+            weekendbackground="white",
+            weekendforeground="#0F172A",
+            othermonthbackground="#F8FAFC",
+            othermonthforeground="#94A3B8",
+            bordercolor="#E2E8F0",
+            font=("Segoe UI", 10),
+            headersfont=("Segoe UI", 10, "bold")
+        )
+        calendar.pack(padx=12, pady=12)
+
+        def close_picker():
+            if picker.winfo_exists():
+                picker.destroy()
+            self.grab_set()
+
+        def select_date(event=None):
+            selected = calendar.selection_get()
+            if selected is None:
+                return
+
+            entry.delete(0, "end")
+            entry.insert(0, selected.strftime("%d/%m/%Y"))
+            validate_callback()
+            close_picker()
+
+        calendar.bind("<<CalendarSelected>>", select_date)
+        picker.protocol("WM_DELETE_WINDOW", close_picker)
+        picker.update_idletasks()
+        picker.geometry(
+            f"+{self.winfo_rootx() + 80}+{self.winfo_rooty() + 120}"
+        )
+        picker.grab_set()
 
     def continue_reservation(self):
 
@@ -849,35 +408,19 @@ class NewReservationDialog(ctk.CTkToplevel):
             self.availability_request = None
             return
 
-        nights = calculate_nights(check_in, check_out)
         guest_count = int(guests)
-        subtotal = calculate_subtotal(self.selected_room["price"], nights)
-        igv = calculate_igv(subtotal)
-
-        reservation = {
-            "customer_dni": customer_dni,
-            "check_in": check_in,
-            "check_out": check_out,
-            "nights": nights,
-            "guest_count": guest_count,
-            "room_number": self.selected_room["number"],
-            "room_type": self.selected_room["type"],
-            "payment_method": payment_method.lower(),
-            "receipt_type": receipt_type.lower(),
-            "subtotal": subtotal,
-            "igv": igv,
-            "total": calculate_total(subtotal, igv)
-        }
+        reservation = build_reservation_data(
+            customer_dni=customer_dni,
+            check_in=check_in,
+            check_out=check_out,
+            guest_count=guest_count,
+            selected_room=self.selected_room,
+            payment_method=payment_method,
+            receipt_type=receipt_type
+        )
 
         try:
-            if get_customer_by_dni(customer_dni) is None:
-                customers = load_customers()
-                customers.append(customer)
-                save_customers(customers)
-
-            reservations = load_reservations()
-            reservations.append(reservation)
-            save_reservations(reservations)
+            persist_reservation(customer, reservation)
         except OSError as error:
             messagebox.showerror(
                 title="Error al guardar",
@@ -900,11 +443,11 @@ class NewReservationDialog(ctk.CTkToplevel):
                 ),
                 parent=self
             )
-            self.destroy()
+            self.after(100, self.destroy)
             return
 
         self.show_receipt_actions(receipt_path)
-        self.destroy()
+        self.after(100, self.destroy)
 
     def show_receipt_actions(self, receipt_path):
 
