@@ -302,7 +302,7 @@ class EditReservationDialog(ctk.CTkToplevel):
                 check_in,
                 check_out
             )
-        except OSError as error:
+        except (OSError, ValueError, KeyError) as error:
             messagebox.showerror(
                 title="Error al buscar habitaciones",
                 message=f"No se pudo consultar la disponibilidad: {error}",

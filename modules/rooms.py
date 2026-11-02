@@ -1,77 +1,125 @@
+import json
+import math
+from pathlib import Path
+
 from storage.json_storage import load_reservations
 from modules.reservation_status import is_reservation_cancelled
 from datetime import datetime
 
 
-rooms = {
+ROOMS_FILE = Path(__file__).resolve().parents[1] / "data" / "rooms.json"
 
-    # ===== SIMPLE ROOMS =====
 
-    101: {
-        "type": "Simple",
-        "capacity": 1,
-        "price": 50,
-    },
+def get_rooms():
+    try:
+        with ROOMS_FILE.open("r", encoding="utf-8") as file:
+            records = json.load(file)
+    except FileNotFoundError as error:
+        raise FileNotFoundError(
+            f"No se encontró el inventario de habitaciones: {ROOMS_FILE}"
+        ) from error
+    except json.JSONDecodeError as error:
+        raise ValueError(
+            f"El archivo de habitaciones no contiene JSON válido: "
+            f"{ROOMS_FILE} (línea {error.lineno}, columna {error.colno})."
+        ) from error
 
-    102: {
-        "type": "Simple",
-        "capacity": 1,
-        "price": 50,
-    },
+    if not isinstance(records, list) or not records:
+        raise ValueError("El inventario de habitaciones debe ser una lista.")
 
-    103: {
-        "type": "Simple",
-        "capacity": 1,
-        "price": 50,
-    },
+    rooms_by_number = {}
+    for room in records:
+        if not isinstance(room, dict):
+            raise ValueError("Cada habitación debe ser un objeto JSON.")
 
-    104: {
-        "type": "Simple",
-        "capacity": 1,
-        "price": 50,
-    },
+        number = room.get("number")
+        room_type = room.get("type")
+        capacity = room.get("capacity")
+        price = room.get("price")
+        maintenance = room.get("maintenance", False)
 
-    # ===== DOUBLE ROOMS =====
+        if isinstance(number, bool) or not isinstance(number, int):
+            raise ValueError("Cada habitación debe tener un número entero.")
+        if number in rooms_by_number:
+            raise ValueError(f"La habitación {number} está duplicada.")
+        if not isinstance(room_type, str) or not room_type.strip():
+            raise ValueError(f"El tipo de la habitación {number} es inválido.")
+        if isinstance(capacity, bool) or not isinstance(capacity, int) or capacity < 1:
+            raise ValueError(f"La capacidad de la habitación {number} es inválida.")
+        if (
+            isinstance(price, bool)
+            or not isinstance(price, (int, float))
+            or (
+                isinstance(price, float)
+                and not math.isfinite(price)
+            )
+            or price < 0
+        ):
+            raise ValueError(f"El precio de la habitación {number} es inválido.")
+        if not isinstance(maintenance, bool):
+            raise ValueError(
+                f"El estado de mantenimiento de la habitación {number} "
+                "debe ser verdadero o falso."
+            )
 
-    201: {
-        "type": "Double",
-        "capacity": 2,
-        "price": 80,
-    },
+        rooms_by_number[number] = {
+            "type": room_type.strip(),
+            "capacity": capacity,
+            "price": price,
+            "maintenance": maintenance
+        }
 
-    202: {
-        "type": "Double",
-        "capacity": 2,
-        "price": 80,
-    },
+    return rooms_by_number
 
-    203: {
-        "type": "Double",
-        "capacity": 2,
-        "price": 80,
-    },
 
-    # ===== SUITES =====
+def save_rooms(rooms_by_number):
+    records = [
+        {
+            "number": number,
+            "type": room["type"],
+            "capacity": room["capacity"],
+            "price": room["price"],
+            "maintenance": room.get("maintenance", False)
+        }
+        for number, room in sorted(rooms_by_number.items())
+    ]
 
-    301: {
-        "type": "Suite",
-        "capacity": 4,
-        "price": 120,
-    },
+    with ROOMS_FILE.open("w", encoding="utf-8") as file:
+        json.dump(records, file, indent=4, ensure_ascii=False)
 
-    302: {
-        "type": "Suite",
-        "capacity": 4,
-        "price": 120,
-    },
 
-    303: {
-        "type": "Suite",
-        "capacity": 4,
-        "price": 120,
-    }
+def set_room_price(room_number, price):
+    if (
+        isinstance(price, bool)
+        or not isinstance(price, (int, float))
+        or (
+            isinstance(price, float)
+            and not math.isfinite(price)
+        )
+        or price < 0
+    ):
+        raise ValueError("El precio debe ser un número mayor o igual a cero.")
 
-}
+    all_rooms = get_rooms()
+    if room_number not in all_rooms:
+        raise KeyError(f"La habitación {room_number} no existe.")
+
+    all_rooms[room_number]["price"] = price
+    save_rooms(all_rooms)
+    return all_rooms[room_number]
+
+
+def set_room_maintenance(room_number, in_maintenance):
+    if not isinstance(in_maintenance, bool):
+        raise ValueError("El estado de mantenimiento debe ser verdadero o falso.")
+
+    all_rooms = get_rooms()
+    if room_number not in all_rooms:
+        raise KeyError(f"La habitación {room_number} no existe.")
+
+    all_rooms[room_number]["maintenance"] = in_maintenance
+    save_rooms(all_rooms)
+    return all_rooms[room_number]
 
 
 # ==========================================
@@ -84,30 +132,20 @@ def show_available_rooms(people_count, check_in, check_out):
     print("     HABITACIONES DISPONIBLES")
     print("=" * 35 + "\n")
 
-    found_room = False
+    available_rooms = get_available_rooms(
+        people_count,
+        check_in,
+        check_out
+    )
+    for room in available_rooms:
+        print(
+            f"{room['number']} - "
+            f"{room['type']} - "
+            f"Capacidad: {room['capacity']} - "
+            f"S/ {room['price']:.2f}"
+        )
 
-    for room_number, room_data in rooms.items():
-
-        if (
-            room_data["capacity"] >= people_count
-            and
-            is_room_available_for_dates(
-                room_number,
-                check_in,
-                check_out
-            )
-        ):
-
-            found_room = True
-
-            print(
-                f"{room_number} - "
-                f"{room_data['type']} - "
-                f"Capacidad: {room_data['capacity']} - "
-                f"S/ {room_data['price']:.2f}"
-            )
-
-    if not found_room:
+    if not available_rooms:
 
         print("No hay habitaciones disponibles.")
 
@@ -118,7 +156,7 @@ def show_available_rooms(people_count, check_in, check_out):
 
 def room_exists(room_number):
 
-    return room_number in rooms
+    return room_number in get_rooms()
 
 
 # ==========================================
@@ -127,7 +165,7 @@ def room_exists(room_number):
 
 def get_room(room_number):
 
-    return rooms[room_number]
+    return get_rooms()[room_number]
 
 
 # ==========================================
@@ -141,6 +179,24 @@ def is_room_available_for_dates(
     ignore_index=None
 ):
 
+    room = get_room(room_number)
+    if room["maintenance"]:
+        return False
+
+    return _is_room_available_for_dates(
+        room_number,
+        check_in,
+        check_out,
+        ignore_index
+    )
+
+
+def _is_room_available_for_dates(
+    room_number,
+    check_in,
+    check_out,
+    ignore_index=None
+):
     reservations = load_reservations()
 
     new_check_in = datetime.strptime(
@@ -300,12 +356,14 @@ def get_available_rooms(
 
     available_rooms = []
 
-    for room_number, room in rooms.items():
+    for room_number, room in get_rooms().items():
 
+        if room["maintenance"]:
+            continue
         if room["capacity"] < guest_count:
             continue
 
-        if not is_room_available_for_dates(
+        if not _is_room_available_for_dates(
             room_number,
             check_in,
             check_out,
@@ -318,7 +376,8 @@ def get_available_rooms(
                 "number": room_number,
                 "type": room["type"],
                 "capacity": room["capacity"],
-                "price": room["price"]
+                "price": room["price"],
+                "maintenance": room["maintenance"]
             }
         )
 
