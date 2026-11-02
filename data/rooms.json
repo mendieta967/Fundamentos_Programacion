@@ -1,0 +1,72 @@
+[
+    {
+        "number": 101,
+        "type": "Simple",
+        "capacity": 1,
+        "price": 50,
+        "maintenance": false
+    },
+    {
+        "number": 102,
+        "type": "Simple",
+        "capacity": 1,
+        "price": 50,
+        "maintenance": false
+    },
+    {
+        "number": 103,
+        "type": "Simple",
+        "capacity": 1,
+        "price": 50,
+        "maintenance": false
+    },
+    {
+        "number": 104,
+        "type": "Simple",
+        "capacity": 1,
+        "price": 50,
+        "maintenance": false
+    },
+    {
+        "number": 201,
+        "type": "Double",
+        "capacity": 2,
+        "price": 80,
+        "maintenance": false
+    },
+    {
+        "number": 202,
+        "type": "Double",
+        "capacity": 2,
+        "price": 80,
+        "maintenance": false
+    },
+    {
+        "number": 203,
+        "type": "Double",
+        "capacity": 2,
+        "price": 80,
+        "maintenance": false
+    },
+    {
+        "number": 301,
+        "type": "Suite",
+        "capacity": 4,
+        "price": 120,
+        "maintenance": false
+    },
+    {
+        "number": 302,
+        "type": "Suite",
+        "capacity": 4,
+        "price": 120,
+        "maintenance": false
+    },
+    {
+        "number": 303,
+        "type": "Suite",
+        "capacity": 4,
+        "price": 120,
+        "maintenance": false
+    }
+]

@@ -44,7 +44,11 @@ def search_room():
 
     print()
 
-    if reservation:
+    if room["maintenance"]:
+
+        print("Estado: En mantenimiento\n")
+
+    elif reservation:
 
         print("Estado: Ocupada\n")
 

@@ -1,13 +1,13 @@
 from modules.helpers import show_room
 
-from modules.rooms import rooms, get_room_current_reservation
+from modules.rooms import get_rooms, get_room_current_reservation
 
 
 def list_rooms():
 
     print("\n===== LISTA DE HABITACIONES =====\n")
 
-    for room_number, room in rooms.items():
+    for room_number, room in get_rooms().items():
 
         show_room(
             room_number,
@@ -18,7 +18,11 @@ def list_rooms():
             room_number
         )
 
-        if reservation:
+        if room["maintenance"]:
+
+            print("Estado: En mantenimiento")
+
+        elif reservation:
 
             print("Estado: Ocupada")
 

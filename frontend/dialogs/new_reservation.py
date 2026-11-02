@@ -220,11 +220,19 @@ class NewReservationDialog(NewReservationWidgets, ctk.CTkToplevel):
         if not (check_in_valid and check_out_valid and guests_valid):
             return
 
-        rooms = get_available_rooms(
-            int(guests),
-            check_in,
-            check_out
-        )
+        try:
+            rooms = get_available_rooms(
+                int(guests),
+                check_in,
+                check_out
+            )
+        except (OSError, ValueError, KeyError) as error:
+            messagebox.showerror(
+                title="Error al buscar habitaciones",
+                message=f"No se pudo consultar el inventario: {error}",
+                parent=self
+            )
+            return
 
         if not rooms:
             messagebox.showwarning(
@@ -403,11 +411,19 @@ class NewReservationDialog(NewReservationWidgets, ctk.CTkToplevel):
             )
             return
 
-        current_rooms = get_available_rooms(
-            int(guests),
-            check_in,
-            check_out
-        )
+        try:
+            current_rooms = get_available_rooms(
+                int(guests),
+                check_in,
+                check_out
+            )
+        except (OSError, ValueError, KeyError) as error:
+            messagebox.showerror(
+                title="Error al confirmar la habitación",
+                message=f"No se pudo verificar el inventario: {error}",
+                parent=self
+            )
+            return
         if not any(
             room["number"] == self.selected_room["number"]
             for room in current_rooms
