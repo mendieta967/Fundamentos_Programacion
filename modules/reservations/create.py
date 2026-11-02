@@ -1,6 +1,7 @@
 from modules.rooms import *
 from modules.validations import *
 from modules.payments import *
+from modules.customer_status import is_customer_active
 from storage.json_storage import *
 
 
@@ -30,6 +31,13 @@ def create_reservation():
     new_customer = False
 
     if customer_exists(customer_dni):
+        customer = get_customer_by_dni(customer_dni)
+        if not is_customer_active(customer):
+            print(
+                "\nEste cliente está dado de baja. "
+                "Restáurelo antes de crear una nueva reserva."
+            )
+            return
 
         print("\nEl cliente ya se encuentra registrado.")
 
@@ -50,8 +58,6 @@ def create_reservation():
             print("Reserva cancelada. Gracias por visitarnos.")
 
             return
-
-        customer = get_customer_by_dni(customer_dni)
 
         customer_name = customer["customer_name"]
         customer_phone = customer["customer_phone"]

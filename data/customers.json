@@ -1,8 +1,9 @@
 [
     {
-        "customer_name": "pedro Olortegui",
+        "customer_name": "Pedro Olortegui Mendieta",
         "customer_dni": "73812771",
-        "customer_phone": "962314587"
+        "customer_phone": "962314587",
+        "status": "active"
     },
     {
         "customer_name": "Alfonso Olortegui ",
@@ -12,7 +13,8 @@
     {
         "customer_name": "Pedro Mendieta",
         "customer_dni": "73812777",
-        "customer_phone": "968574321"
+        "customer_phone": "968574321",
+        "status": "active"
     },
     {
         "customer_name": "Brisa Soriano",
@@ -38,5 +40,10 @@
         "customer_name": "ZOE",
         "customer_dni": "73812444",
         "customer_phone": "123698574"
+    },
+    {
+        "customer_name": "zoe",
+        "customer_dni": "12365498",
+        "customer_phone": "196325874"
     }
 ]

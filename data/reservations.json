@@ -125,5 +125,19 @@
         "subtotal": 50,
         "igv": 9.0,
         "total": 59.0
+    },
+    {
+        "customer_dni": "12365498",
+        "check_in": "03/11/2026",
+        "check_out": "04/11/2026",
+        "nights": 1,
+        "guest_count": 3,
+        "room_number": 303,
+        "room_type": "Suite",
+        "payment_method": "efectivo",
+        "receipt_type": "boleta",
+        "subtotal": 120,
+        "igv": 21.599999999999998,
+        "total": 141.6
     }
 ]
