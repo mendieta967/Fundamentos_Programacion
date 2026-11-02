@@ -5,13 +5,14 @@ from modules.helpers import show_room
 from storage.json_storage import (
     load_reservations
 )
+from modules.reservation_status import active_reservations
 
 
 def most_reserved_room():
 
     print("\n===== HABITACIÓN MÁS RESERVADA =====\n")
 
-    reservations = load_reservations()
+    reservations = active_reservations(load_reservations())
 
     if not reservations:
 

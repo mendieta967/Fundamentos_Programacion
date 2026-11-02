@@ -2,13 +2,14 @@ from storage.json_storage import (
     get_customer_by_dni,
     load_reservations
 )
+from modules.reservation_status import active_reservations
 
 
 def frequent_customers():
 
     print("\n===== CLIENTES FRECUENTES =====\n")
 
-    reservations = load_reservations()
+    reservations = active_reservations(load_reservations())
 
     if not reservations:
 

@@ -1,4 +1,5 @@
 from storage.json_storage import load_reservations
+from modules.reservation_status import is_reservation_cancelled
 from datetime import datetime
 
 
@@ -159,6 +160,9 @@ def is_room_available_for_dates(
 
             continue
 
+        if is_reservation_cancelled(reservation):
+            continue
+
         if reservation["room_number"] == room_number:
 
             existing_check_in = datetime.strptime(
@@ -198,6 +202,9 @@ def get_room_current_reservation(room_number):
     )
 
     for reservation in reservations:
+
+        if is_reservation_cancelled(reservation):
+            continue
 
         if reservation["room_number"] != room_number:
 
