@@ -1,4 +1,5 @@
 from modules.rooms import room_exists, get_room, get_room_current_reservation
+from storage.json_storage import get_customer_by_dni
 
 from modules.helpers import show_room
 
@@ -52,7 +53,13 @@ def search_room():
 
         print("Estado: Ocupada\n")
 
-        print(f"Cliente: {reservation['customer_name']}")
+        customer = get_customer_by_dni(reservation["customer_dni"])
+        customer_name = (
+            customer["customer_name"]
+            if customer
+            else "Cliente no encontrado en el registro."
+        )
+        print(f"Cliente: {customer_name}")
         print(f"Desde: {reservation['check_in']}")
         print(f"Hasta: {reservation['check_out']}")
 

@@ -1,8 +1,8 @@
 from datetime import date, datetime
 import customtkinter as ctk
-from tkinter import messagebox
 from tkcalendar import Calendar
 
+from frontend.dialogs.alerts import messagebox
 from frontend.styles import PRIMARY, TEXT
 from storage.json_storage import get_customer_by_dni
 from frontend.validators.reservation_validator import ReservationValidator

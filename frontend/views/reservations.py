@@ -1,8 +1,8 @@
-from tkinter import messagebox
 from datetime import datetime
 
 import customtkinter as ctk
 
+from frontend.dialogs.alerts import messagebox
 from frontend.utils.icons import load_icon
 from storage.json_storage import (
     get_customer_by_dni,

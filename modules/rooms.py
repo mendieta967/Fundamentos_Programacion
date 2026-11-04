@@ -8,6 +8,7 @@ from datetime import datetime
 
 
 ROOMS_FILE = Path(__file__).resolve().parents[1] / "data" / "rooms.json"
+_UNSET = object()
 
 
 def get_rooms():
@@ -89,7 +90,29 @@ def save_rooms(rooms_by_number):
 
 
 def set_room_price(room_number, price):
-    if (
+    return _update_room(
+        room_number,
+        price=price
+    )
+
+
+def set_room_maintenance(room_number, in_maintenance):
+    return _update_room(
+        room_number,
+        in_maintenance=in_maintenance
+    )
+
+
+def update_room_details(room_number, price, in_maintenance):
+    return _update_room(
+        room_number,
+        price=price,
+        in_maintenance=in_maintenance
+    )
+
+
+def _update_room(room_number, price=_UNSET, in_maintenance=_UNSET):
+    if price is not _UNSET and (
         isinstance(price, bool)
         or not isinstance(price, (int, float))
         or (
@@ -100,26 +123,43 @@ def set_room_price(room_number, price):
     ):
         raise ValueError("El precio debe ser un número mayor o igual a cero.")
 
-    all_rooms = get_rooms()
-    if room_number not in all_rooms:
-        raise KeyError(f"La habitación {room_number} no existe.")
-
-    all_rooms[room_number]["price"] = price
-    save_rooms(all_rooms)
-    return all_rooms[room_number]
-
-
-def set_room_maintenance(room_number, in_maintenance):
-    if not isinstance(in_maintenance, bool):
+    if in_maintenance is not _UNSET and not isinstance(in_maintenance, bool):
         raise ValueError("El estado de mantenimiento debe ser verdadero o falso.")
 
     all_rooms = get_rooms()
     if room_number not in all_rooms:
         raise KeyError(f"La habitación {room_number} no existe.")
 
-    all_rooms[room_number]["maintenance"] = in_maintenance
+    current_room = all_rooms[room_number]
+    next_maintenance = (
+        current_room["maintenance"]
+        if in_maintenance is _UNSET
+        else in_maintenance
+    )
+
+    if next_maintenance and not current_room["maintenance"]:
+        today = datetime.today().date()
+        has_upcoming_or_ongoing_reservation = any(
+            reservation["room_number"] == room_number
+            and not is_reservation_cancelled(reservation)
+            and datetime.strptime(
+                reservation["check_out"],
+                "%d/%m/%Y"
+            ).date() >= today
+            for reservation in load_reservations()
+        )
+        if has_upcoming_or_ongoing_reservation:
+            raise ValueError(
+                f"No se puede poner en mantenimiento la habitación "
+                f"{room_number}: tiene reservas vigentes o futuras "
+                "no canceladas."
+            )
+
+    if price is not _UNSET:
+        current_room["price"] = price
+    current_room["maintenance"] = next_maintenance
     save_rooms(all_rooms)
-    return all_rooms[room_number]
+    return current_room
 
 
 # ==========================================

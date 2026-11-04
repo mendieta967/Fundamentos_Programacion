@@ -1,6 +1,6 @@
 import customtkinter as ctk
-from tkinter import messagebox
 
+from frontend.dialogs.alerts import messagebox
 from frontend.components.services.customer_service import CustomerService
 from frontend.styles import PRIMARY, TEXT
 from frontend.validators.customer_validator import CustomerValidator
