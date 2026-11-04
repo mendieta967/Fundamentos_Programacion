@@ -10,8 +10,8 @@
         "number": 102,
         "type": "Simple",
         "capacity": 1,
-        "price": 50,
-        "maintenance": false
+        "price": 50.0,
+        "maintenance": true
     },
     {
         "number": 103,

@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from datetime import datetime
-from tkinter import messagebox
 
+from frontend.dialogs.alerts import messagebox
 from frontend.styles import TEXT
 from frontend.components.services.reservation_search_service import (
     ReservationSearchService

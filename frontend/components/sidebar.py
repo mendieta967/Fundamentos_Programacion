@@ -223,7 +223,7 @@ class Sidebar(ctk.CTkFrame):
             text_color="white",
             font=("Segoe UI", 14, "bold"),
             corner_radius=12,
-            border_spacing=18,
+            border_spacing=14,
             cursor="hand2",
             command=lambda k=key, v=view: self.change_view(k, v)
         )
@@ -231,7 +231,7 @@ class Sidebar(ctk.CTkFrame):
         button.grid(
             row=row,
             column=0,
-            padx=18,
+            padx=12,
             pady=6,
             sticky="ew"
         )

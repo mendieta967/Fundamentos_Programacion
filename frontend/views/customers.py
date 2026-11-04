@@ -1,6 +1,6 @@
 import customtkinter as ctk
-from tkinter import messagebox
 
+from frontend.dialogs.alerts import messagebox
 from frontend.utils.icons import load_icon
 from frontend.dialogs.new_customer import NewCustomerDialog
 from frontend.dialogs.edit_customer import EditCustomerDialog

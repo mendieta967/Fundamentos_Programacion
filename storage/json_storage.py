@@ -1,12 +1,14 @@
 import json
+from pathlib import Path
 
 
 # ==========================================
 # RUTAS DE LOS ARCHIVOS
 # ==========================================
 
-RESERVATIONS_FILE = "data/reservations.json"
-CUSTOMERS_FILE = "data/customers.json"
+DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+RESERVATIONS_FILE = DATA_DIR / "reservations.json"
+CUSTOMERS_FILE = DATA_DIR / "customers.json"
 
 
 # ==========================================
@@ -17,7 +19,7 @@ def load_reservations():
 
     try:
 
-        with open(RESERVATIONS_FILE, "r") as file:
+        with RESERVATIONS_FILE.open("r", encoding="utf-8") as file:
 
             return json.load(file)
 
@@ -28,7 +30,7 @@ def load_reservations():
 
 def save_reservations(reservations):
 
-    with open(RESERVATIONS_FILE, "w") as file:
+    with RESERVATIONS_FILE.open("w", encoding="utf-8") as file:
 
         json.dump(
             reservations,
@@ -46,7 +48,7 @@ def load_customers():
 
     try:
 
-        with open(CUSTOMERS_FILE, "r") as file:
+        with CUSTOMERS_FILE.open("r", encoding="utf-8") as file:
 
             return json.load(file)
 
@@ -57,7 +59,7 @@ def load_customers():
 
 def save_customers(customers):
 
-    with open(CUSTOMERS_FILE, "w") as file:
+    with CUSTOMERS_FILE.open("w", encoding="utf-8") as file:
 
         json.dump(
             customers,

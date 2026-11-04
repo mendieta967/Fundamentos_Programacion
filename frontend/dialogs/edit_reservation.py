@@ -1,9 +1,9 @@
 from datetime import date, datetime
-from tkinter import messagebox
 
 import customtkinter as ctk
 from tkcalendar import Calendar
 
+from frontend.dialogs.alerts import messagebox
 from frontend.components.services.edit_reservation_service import (
     get_available_rooms_for_reservation,
     update_reservation
