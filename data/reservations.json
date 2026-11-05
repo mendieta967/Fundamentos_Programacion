@@ -68,7 +68,8 @@
         "receipt_type": "factura",
         "subtotal": 320,
         "igv": 57.599999999999994,
-        "total": 377.6
+        "total": 377.6,
+        "status": "cancelled"
     },
     {
         "customer_dni": "12369854",
@@ -82,7 +83,8 @@
         "receipt_type": "boleta",
         "subtotal": 250,
         "igv": 45.0,
-        "total": 295.0
+        "total": 295.0,
+        "status": "cancelled"
     },
     {
         "customer_dni": "73812778",
@@ -139,5 +141,34 @@
         "subtotal": 120,
         "igv": 21.599999999999998,
         "total": 141.6
+    },
+    {
+        "customer_dni": "73812777",
+        "check_in": "05/11/2026",
+        "check_out": "07/11/2026",
+        "nights": 2,
+        "guest_count": 2,
+        "room_number": 201,
+        "room_type": "Double",
+        "payment_method": "efectivo",
+        "receipt_type": "boleta",
+        "subtotal": 160,
+        "igv": 28.799999999999997,
+        "total": 188.8
+    },
+    {
+        "customer_dni": "12345678",
+        "check_in": "06/11/2026",
+        "check_out": "07/11/2026",
+        "nights": 1,
+        "guest_count": 2,
+        "room_number": 203,
+        "room_type": "Double",
+        "payment_method": "efectivo",
+        "receipt_type": "factura",
+        "subtotal": 80,
+        "igv": 14.399999999999999,
+        "total": 94.4,
+        "status": "active"
     }
 ]

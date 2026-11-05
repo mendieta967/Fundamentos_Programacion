@@ -2,6 +2,7 @@ import customtkinter as ctk
 
 from frontend.dialogs.alerts import messagebox
 from frontend.styles import PRIMARY, TEXT
+from frontend.validators.room_validator import RoomValidator
 from modules.rooms import update_room_details
 
 
@@ -165,14 +166,15 @@ class EditRoomDialog(ctk.CTkToplevel):
 
     def save_changes(self):
         try:
-            price = float(self.price_entry.get().strip().replace(",", "."))
-        except ValueError:
+            price = RoomValidator.parse_price(self.price_entry.get())
+        except ValueError as error:
             self.error_label.configure(
-                text="Ingresá un precio numérico válido."
+                text=str(error)
             )
             self.price_entry.focus_set()
             return
 
+        self.error_label.configure(text="")
         try:
             update_room_details(
                 self.room["number"],
