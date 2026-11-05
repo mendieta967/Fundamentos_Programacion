@@ -1,10 +1,10 @@
 import json
-import math
 from pathlib import Path
 
 from storage.json_storage import load_reservations
 from modules.reservation_status import is_reservation_cancelled
 from datetime import datetime
+from frontend.validators.room_validator import RoomValidator
 
 
 ROOMS_FILE = Path(__file__).resolve().parents[1] / "data" / "rooms.json"
@@ -47,16 +47,9 @@ def get_rooms():
             raise ValueError(f"El tipo de la habitación {number} es inválido.")
         if isinstance(capacity, bool) or not isinstance(capacity, int) or capacity < 1:
             raise ValueError(f"La capacidad de la habitación {number} es inválida.")
-        if (
-            isinstance(price, bool)
-            or not isinstance(price, (int, float))
-            or (
-                isinstance(price, float)
-                and not math.isfinite(price)
-            )
-            or price < 0
-        ):
-            raise ValueError(f"El precio de la habitación {number} es inválido.")
+        valid_price, message = RoomValidator.validate_price(price)
+        if not valid_price:
+            raise ValueError(message)
         if not isinstance(maintenance, bool):
             raise ValueError(
                 f"El estado de mantenimiento de la habitación {number} "
@@ -112,16 +105,10 @@ def update_room_details(room_number, price, in_maintenance):
 
 
 def _update_room(room_number, price=_UNSET, in_maintenance=_UNSET):
-    if price is not _UNSET and (
-        isinstance(price, bool)
-        or not isinstance(price, (int, float))
-        or (
-            isinstance(price, float)
-            and not math.isfinite(price)
-        )
-        or price < 0
-    ):
-        raise ValueError("El precio debe ser un número mayor o igual a cero.")
+    if price is not _UNSET:
+        valid_price, message = RoomValidator.validate_price(price)
+        if not valid_price:
+            raise ValueError(message)
 
     if in_maintenance is not _UNSET and not isinstance(in_maintenance, bool):
         raise ValueError("El estado de mantenimiento debe ser verdadero o falso.")
@@ -316,7 +303,7 @@ def get_room_current_reservation(room_number):
             "%d/%m/%Y"
         )
 
-        if check_in <= today <= check_out:
+        if check_in <= today < check_out:
 
             return reservation
 

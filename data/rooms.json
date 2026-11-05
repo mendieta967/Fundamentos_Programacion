@@ -3,7 +3,7 @@
         "number": 101,
         "type": "Simple",
         "capacity": 1,
-        "price": 50,
+        "price": 50.0,
         "maintenance": false
     },
     {
@@ -11,7 +11,7 @@
         "type": "Simple",
         "capacity": 1,
         "price": 50.0,
-        "maintenance": true
+        "maintenance": false
     },
     {
         "number": 103,

@@ -6,6 +6,7 @@ from tkcalendar import Calendar
 from frontend.dialogs.alerts import messagebox
 from frontend.components.services.edit_reservation_service import (
     get_available_rooms_for_reservation,
+    rebook_cancelled_reservation,
     update_reservation
 )
 from frontend.styles import PRIMARY, TEXT
@@ -14,18 +15,30 @@ from frontend.validators.reservation_validator import ReservationValidator
 
 class EditReservationDialog(ctk.CTkToplevel):
 
-    def __init__(self, parent, reservation_index, reservation, on_saved=None):
+    def __init__(
+        self,
+        parent,
+        reservation_index,
+        reservation,
+        on_saved=None,
+        rebooking=False
+    ):
         super().__init__(parent)
 
         self.reservation_index = reservation_index
         self.reservation = reservation
         self.on_saved = on_saved
+        self.rebooking = rebooking
         self.validator = ReservationValidator()
         self.available_rooms = []
         self.availability_request = None
         self._availability_after_id = None
 
-        self.title("Editar reserva")
+        self.title(
+            "Reprogramar y reactivar"
+            if self.rebooking
+            else "Editar reserva"
+        )
         self.geometry("520x680")
         self.resizable(False, False)
         self.configure(fg_color="#F1F5F9")
@@ -38,7 +51,11 @@ class EditReservationDialog(ctk.CTkToplevel):
     def _create_widgets(self):
         ctk.CTkLabel(
             self,
-            text="Editar reserva",
+            text=(
+                "Reprogramar y reactivar"
+                if self.rebooking
+                else "Editar reserva"
+            ),
             font=("Segoe UI", 24, "bold"),
             text_color=TEXT
         ).pack(pady=(20, 4))
@@ -52,6 +69,23 @@ class EditReservationDialog(ctk.CTkToplevel):
             font=("Segoe UI", 13),
             text_color="#64748B"
         ).pack(pady=(0, 14))
+
+        if self.rebooking:
+            ctk.CTkLabel(
+                self,
+                text=(
+                    "La reserva cancelada se conservará en el historial. "
+                    "Al confirmar, se creará otra reserva activa si hay "
+                    "disponibilidad."
+                ),
+                font=("Segoe UI", 11),
+                text_color="#9A3412",
+                fg_color="#FFF7ED",
+                corner_radius=8,
+                wraplength=480,
+                padx=12,
+                pady=8
+            ).pack(pady=(0, 12))
 
         content = ctk.CTkScrollableFrame(
             self,
@@ -147,11 +181,15 @@ class EditReservationDialog(ctk.CTkToplevel):
 
         ctk.CTkButton(
             content,
-            text="Guardar cambios",
+            text=(
+                "Reprogramar y reactivar"
+                if self.rebooking
+                else "Guardar cambios"
+            ),
             height=42,
             font=("Segoe UI", 14, "bold"),
-            fg_color=PRIMARY,
-            hover_color="#1D4ED8",
+            fg_color="#16A34A" if self.rebooking else PRIMARY,
+            hover_color="#15803D" if self.rebooking else "#1D4ED8",
             command=self.save_changes
         ).pack(fill="x", padx=18, pady=(8, 18))
 
@@ -267,7 +305,10 @@ class EditReservationDialog(ctk.CTkToplevel):
         check_out = self.entry_checkout.get().strip()
         guests = self.entry_guests.get().strip()
 
-        if check_in == self.reservation["check_in"]:
+        if (
+            check_in == self.reservation["check_in"]
+            and not self.rebooking
+        ):
             check_in_valid, check_in_message = True, ""
         else:
             check_in_valid, check_in_message = (
@@ -392,7 +433,7 @@ class EditReservationDialog(ctk.CTkToplevel):
 
         check_in_valid, check_in_message = (
             self.validator.validate_check_in(check_in)
-            if check_in != self.reservation["check_in"]
+            if self.rebooking or check_in != self.reservation["check_in"]
             else (True, "")
         )
         check_out_valid, check_out_message = (
@@ -429,13 +470,22 @@ class EditReservationDialog(ctk.CTkToplevel):
             return
 
         try:
-            update_reservation(
-                self.reservation_index,
-                check_in,
-                check_out,
-                int(guests),
-                room_number
-            )
+            if self.rebooking:
+                rebook_cancelled_reservation(
+                    self.reservation_index,
+                    check_in,
+                    check_out,
+                    int(guests),
+                    room_number
+                )
+            else:
+                update_reservation(
+                    self.reservation_index,
+                    check_in,
+                    check_out,
+                    int(guests),
+                    room_number
+                )
         except (OSError, ValueError, IndexError) as error:
             messagebox.showerror(
                 title="No se pudo actualizar",
@@ -446,4 +496,13 @@ class EditReservationDialog(ctk.CTkToplevel):
 
         if self.on_saved is not None:
             self.on_saved()
+        if self.rebooking:
+            messagebox.showinfo(
+                title="Reserva reprogramada",
+                message=(
+                    "Se creó una nueva reserva activa. La reserva cancelada "
+                    "original se conservó en el historial."
+                ),
+                parent=self
+            )
         self.destroy()
