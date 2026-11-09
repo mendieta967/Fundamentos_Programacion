@@ -212,7 +212,7 @@ class EditCustomerDialog(ctk.CTkToplevel):
                 self.entry_name.get(),
                 self.entry_phone.get()
             )
-        except OSError as error:
+        except (OSError, ValueError) as error:
             messagebox.showerror(
                 title="Error al guardar",
                 message=f"No se pudo actualizar el cliente: {error}",

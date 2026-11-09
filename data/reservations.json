@@ -170,5 +170,35 @@
         "igv": 14.399999999999999,
         "total": 94.4,
         "status": "active"
+    },
+    {
+        "customer_dni": "12345679",
+        "check_in": "09/11/2026",
+        "check_out": "11/11/2026",
+        "nights": 2,
+        "guest_count": 3,
+        "room_number": 301,
+        "room_type": "Suite",
+        "payment_method": "efectivo",
+        "receipt_type": "boleta",
+        "subtotal": 240,
+        "igv": 43.199999999999996,
+        "total": 283.2,
+        "status": "cancelled"
+    },
+    {
+        "customer_dni": "12345679",
+        "check_in": "09/11/2026",
+        "check_out": "11/11/2026",
+        "nights": 2,
+        "guest_count": 3,
+        "room_number": 301,
+        "room_type": "Suite",
+        "payment_method": "efectivo",
+        "receipt_type": "boleta",
+        "subtotal": 240,
+        "igv": 43.199999999999996,
+        "total": 283.2,
+        "status": "active"
     }
 ]

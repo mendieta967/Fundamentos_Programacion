@@ -45,5 +45,10 @@
         "customer_name": "zoe",
         "customer_dni": "12365498",
         "customer_phone": "196325874"
+    },
+    {
+        "customer_name": "Juancho",
+        "customer_dni": "12345679",
+        "customer_phone": "968574321"
     }
 ]

@@ -145,12 +145,21 @@ class ReservationsView(ctk.CTkFrame):
 
         self.create_header()
 
-        customers = {
-            customer["customer_dni"]: customer["customer_name"]
-            for customer in load_customers()
-        }
-
-        reservations = load_reservations()
+        try:
+            customers = {
+                customer["customer_dni"]: customer["customer_name"]
+                for customer in load_customers()
+            }
+            reservations = load_reservations()
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            ctk.CTkLabel(
+                self.table,
+                text=f"No se pudieron cargar las reservas: {error}",
+                font=("Segoe UI", 13),
+                text_color="#B91C1C",
+                wraplength=800
+            ).pack(padx=20, pady=28)
+            return
 
         for index, reservation in enumerate(reservations):
             check_out = reservation["check_out"]
@@ -412,7 +421,7 @@ class ReservationsView(ctk.CTkFrame):
                 )
             ).pack(side="left", padx=4)
 
-        elif estado != "Finalizada":
+        if not is_cancelled and estado != "Finalizada":
             ctk.CTkButton(
                 actions_cell,
                 text="",
@@ -473,7 +482,16 @@ class ReservationsView(ctk.CTkFrame):
         )
 
     def print_reservation(self, reservation, status):
-        customer = get_customer_by_dni(reservation["customer_dni"])
+        try:
+            customer = get_customer_by_dni(reservation["customer_dni"])
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            messagebox.showerror(
+                title="No se pudo cargar el cliente",
+                message=f"No se pudo leer el archivo de clientes: {error}",
+                parent=self
+            )
+            return
+
         if customer is None:
             messagebox.showerror(
                 title="Cliente no encontrado",
