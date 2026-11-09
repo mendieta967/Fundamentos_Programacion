@@ -16,16 +16,17 @@ CUSTOMERS_FILE = DATA_DIR / "customers.json"
 # ==========================================
 
 def load_reservations():
-
     try:
-
         with RESERVATIONS_FILE.open("r", encoding="utf-8") as file:
-
             return json.load(file)
-
-    except (FileNotFoundError, json.JSONDecodeError):
-
+    except FileNotFoundError:
         return []
+    except json.JSONDecodeError as error:
+        raise ValueError(
+            "El archivo de reservas contiene JSON inválido "
+            f"(línea {error.lineno}, columna {error.colno}): "
+            f"{RESERVATIONS_FILE}"
+        ) from error
 
 
 def save_reservations(reservations):
@@ -45,16 +46,17 @@ def save_reservations(reservations):
 # ==========================================
 
 def load_customers():
-
     try:
-
         with CUSTOMERS_FILE.open("r", encoding="utf-8") as file:
-
             return json.load(file)
-
-    except (FileNotFoundError, json.JSONDecodeError):
-
+    except FileNotFoundError:
         return []
+    except json.JSONDecodeError as error:
+        raise ValueError(
+            "El archivo de clientes contiene JSON inválido "
+            f"(línea {error.lineno}, columna {error.colno}): "
+            f"{CUSTOMERS_FILE}"
+        ) from error
 
 
 def save_customers(customers):

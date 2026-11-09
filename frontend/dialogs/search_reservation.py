@@ -172,7 +172,7 @@ class SearchReservationDialog(ctk.CTkToplevel):
 
         try:
             reservations = ReservationSearchService.search_by_dni(dni)
-        except OSError as error:
+        except (OSError, ValueError) as error:
             messagebox.showerror(
                 title="Error al buscar",
                 message=f"No se pudieron cargar las reservas: {error}",

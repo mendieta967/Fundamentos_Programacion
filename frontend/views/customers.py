@@ -141,7 +141,17 @@ class CustomersView(ctk.CTkFrame):
 
         self.create_header()
 
-        customers = CustomerSearchService.search(self.search.get())
+        try:
+            customers = CustomerSearchService.search(self.search.get())
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            ctk.CTkLabel(
+                self.table,
+                text=f"No se pudieron cargar los clientes: {error}",
+                font=("Segoe UI", 13),
+                text_color="#B91C1C",
+                wraplength=800
+            ).pack(pady=28)
+            return
 
         if not customers:
             ctk.CTkLabel(
@@ -310,7 +320,7 @@ class CustomersView(ctk.CTkFrame):
             active_reservations = CustomerService.get_active_reservations(
                 customer["customer_dni"]
             )
-        except (KeyError, ValueError) as error:
+        except (OSError, KeyError, ValueError, TypeError) as error:
             messagebox.showerror(
                 title="No se pudo verificar las reservas",
                 message=(
@@ -335,7 +345,7 @@ class CustomersView(ctk.CTkFrame):
             updated, message = CustomerService.deactivate_customer(
                 customer["customer_dni"]
             )
-        except OSError as error:
+        except (OSError, ValueError, KeyError, TypeError) as error:
             messagebox.showerror(
                 title="No se pudo dar de baja",
                 message=f"No se pudo actualizar el cliente: {error}",
@@ -351,7 +361,7 @@ class CustomersView(ctk.CTkFrame):
                             customer["customer_dni"]
                         )
                     )
-                except (KeyError, ValueError) as error:
+                except (OSError, KeyError, ValueError, TypeError) as error:
                     messagebox.showerror(
                         title="No se pudo verificar las reservas",
                         message=f"No se pudo verificar el estado: {error}",
@@ -478,7 +488,7 @@ class CustomersView(ctk.CTkFrame):
             updated, message = CustomerService.restore_customer(
                 customer["customer_dni"]
             )
-        except OSError as error:
+        except (OSError, ValueError, KeyError, TypeError) as error:
             messagebox.showerror(
                 title="No se pudo restaurar",
                 message=f"No se pudo actualizar el cliente: {error}",

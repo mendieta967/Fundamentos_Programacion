@@ -301,7 +301,7 @@ class NewCustomerDialog(ctk.CTkToplevel):
                 dni,
                 phone
             )
-        except OSError as error:
+        except (OSError, ValueError) as error:
             messagebox.showerror(
                 title="Error al guardar",
                 message=f"No se pudo guardar el cliente: {error}",

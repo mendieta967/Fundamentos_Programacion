@@ -40,7 +40,15 @@ class NewReservationDialog(NewReservationWidgets, ctk.CTkToplevel):
 
         dni = self.entry_dni.get().strip()
 
-        customer = get_customer_by_dni(dni)
+        try:
+            customer = get_customer_by_dni(dni)
+        except (OSError, ValueError) as error:
+            messagebox.showerror(
+                title="No se pudo buscar el cliente",
+                message=f"No se pudo leer el archivo de clientes: {error}",
+                parent=self
+            )
+            return
 
         self.form_customer.pack_forget()
         self.form_reservation.pack_forget()
@@ -359,7 +367,15 @@ class NewReservationDialog(NewReservationWidgets, ctk.CTkToplevel):
             )
             return
 
-        customer = get_customer_by_dni(customer_dni)
+        try:
+            customer = get_customer_by_dni(customer_dni)
+        except (OSError, ValueError) as error:
+            messagebox.showerror(
+                title="No se pudo cargar el cliente",
+                message=f"No se pudo leer el archivo de clientes: {error}",
+                parent=self
+            )
+            return
         if customer is not None and not CustomerService.is_active(customer):
             messagebox.showwarning(
                 title="Cliente dado de baja",
