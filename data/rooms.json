@@ -11,7 +11,7 @@
         "type": "Simple",
         "capacity": 1,
         "price": 50.0,
-        "maintenance": false
+        "maintenance": true
     },
     {
         "number": 103,
@@ -31,7 +31,7 @@
         "number": 201,
         "type": "Double",
         "capacity": 2,
-        "price": 80,
+        "price": 80.0,
         "maintenance": false
     },
     {

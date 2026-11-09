@@ -200,5 +200,19 @@
         "igv": 43.199999999999996,
         "total": 283.2,
         "status": "active"
+    },
+    {
+        "customer_dni": "72345511",
+        "check_in": "05/11/2026",
+        "check_out": "08/11/2026",
+        "nights": 3,
+        "guest_count": 3,
+        "room_number": 303,
+        "room_type": "Suite",
+        "payment_method": "efectivo",
+        "receipt_type": "boleta",
+        "subtotal": 360,
+        "igv": 64.8,
+        "total": 424.8
     }
 ]

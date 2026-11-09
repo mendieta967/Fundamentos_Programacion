@@ -47,8 +47,14 @@
         "customer_phone": "196325874"
     },
     {
+<<<<<<< Updated upstream
         "customer_name": "Juancho",
         "customer_dni": "12345679",
         "customer_phone": "968574321"
+=======
+        "customer_name": "Renzo tantaquispe",
+        "customer_dni": "72345511",
+        "customer_phone": "918816787"
+>>>>>>> Stashed changes
     }
 ]
