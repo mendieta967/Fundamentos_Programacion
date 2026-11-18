@@ -2,7 +2,9 @@ from modules.payments import calculate_igv, calculate_subtotal, calculate_total
 from modules.reservation_status import cancel_reservation, restore_reservation
 from modules.validations import calculate_nights
 from frontend.components.services.customer_service import CustomerService
+from modules.rooms import get_available_rooms
 from storage.json_storage import (
+    DATA_LOCK,
     get_customer_by_dni,
     load_customers,
     load_reservations,
@@ -42,23 +44,39 @@ def build_reservation_data(
 
 def persist_reservation(customer, reservation):
     customer_dni = reservation["customer_dni"]
-    existing_customer = get_customer_by_dni(customer_dni)
-    if existing_customer is not None and not CustomerService.is_active(
-        existing_customer
-    ):
-        raise ValueError(
-            "El cliente está dado de baja. Restauralo antes de crear "
-            "una nueva reserva."
+
+    with DATA_LOCK:
+        existing_customer = get_customer_by_dni(customer_dni)
+        if existing_customer is not None and not CustomerService.is_active(
+            existing_customer
+        ):
+            raise ValueError(
+                "El cliente está dado de baja. Restauralo antes de crear "
+                "una nueva reserva."
+            )
+
+        available_rooms = get_available_rooms(
+            reservation["guest_count"],
+            reservation["check_in"],
+            reservation["check_out"]
         )
+        if not any(
+            room["number"] == reservation["room_number"]
+            for room in available_rooms
+        ):
+            raise ValueError(
+                "La habitación seleccionada ya no está disponible. "
+                "Volvé a buscar habitaciones antes de confirmar."
+            )
 
-    if existing_customer is None:
-        customers = load_customers()
-        customers.append(customer)
-        save_customers(customers)
+        if existing_customer is None:
+            customers = load_customers()
+            customers.append(customer)
+            save_customers(customers)
 
-    reservations = load_reservations()
-    reservations.append(reservation)
-    save_reservations(reservations)
+        reservations = load_reservations()
+        reservations.append(reservation)
+        save_reservations(reservations)
 
 
 __all__ = [
