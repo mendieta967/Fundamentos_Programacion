@@ -64,9 +64,9 @@ class CustomersView(ctk.CTkFrame):
 
         self.search = ctk.CTkEntry(
             top,
-            placeholder_text="Buscar cliente...",
+            placeholder_text="Buscar por nombre, DNI o teléfono...",
             height=42,
-            width=350
+            width=260
         )
 
         self.search.pack(
@@ -88,12 +88,7 @@ class CustomersView(ctk.CTkFrame):
             command=self.refresh_table
         )
 
-        search_button.pack(side="left")
-        self.search.bind(
-            "<KeyRelease>",
-            lambda _event: self.refresh_table()
-        )
-        self.search.bind("<Return>", lambda _event: self.refresh_table())
+        search_button.pack(side="left", padx=(0, 8))
 
         new_button = ctk.CTkButton(
             top,
@@ -107,10 +102,40 @@ class CustomersView(ctk.CTkFrame):
             command=self.open_new_customer
         )
 
-        new_button.pack(
-            side="right",
-            padx=(10, 0)
+        new_button.pack(side="left", padx=(8, 8))
+
+        self.status_filter = ctk.CTkComboBox(
+            top,
+            values=[
+                "Todos los estados",
+                "Activo",
+                "Dado de baja"
+            ],
+            width=160,
+            height=42,
+            state="readonly",
+            corner_radius=8,
+            border_width=1,
+            border_color="#CBD5E1",
+            fg_color="#F8FAFC",
+            text_color="#0F172A",
+            button_color="#2563EB",
+            button_hover_color="#1D4ED8",
+            font=("Segoe UI", 11, "bold")
         )
+        self.status_filter.set("Todos los estados")
+        self.status_filter.configure(
+            command=lambda _value: self.refresh_table()
+        )
+        self.status_filter.pack(side="right")
+
+        self.search.bind(
+            "<KeyRelease>",
+            lambda _event: self.refresh_table()
+        )
+        self.search.bind("<Return>", lambda _event: self.refresh_table())
+
+
 
         self.table = ctk.CTkScrollableFrame(
             self,
@@ -133,6 +158,7 @@ class CustomersView(ctk.CTkFrame):
 
     def _customer_created(self):
         self.search.delete(0, "end")
+        self.status_filter.set("Todos los estados")
         self.refresh_table()
 
     def refresh_table(self):
@@ -142,7 +168,10 @@ class CustomersView(ctk.CTkFrame):
         self.create_header()
 
         try:
-            customers = CustomerSearchService.search(self.search.get())
+            customers = CustomerSearchService.search(
+                self.search.get(),
+                self.status_filter.get()
+            )
         except (OSError, ValueError, KeyError, TypeError) as error:
             ctk.CTkLabel(
                 self.table,
