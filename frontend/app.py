@@ -87,6 +87,11 @@ class App(ctk.CTk):
     # CAMBIAR VISTA
     # ==========================================
 
+    def logout(self):
+        self.withdraw()
+        from frontend.auth.login import LoginWindow
+        LoginWindow(self)
+
     def show_view(self, view_class):
 
         if self.current_view is not None:

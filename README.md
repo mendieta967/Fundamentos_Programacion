@@ -1,45 +1,72 @@
 # Hostel Melimer
 
-Sistema de gestion de un hostel desarrollado en Python. Permite administrar reservas, clientes y habitaciones, consultar reportes y generar comprobantes en PDF. Incluye una interfaz grafica con CustomTkinter y una interfaz por consola.
+Sistema de gestión de un hostel desarrollado en Python. Permite administrar reservas, clientes y habitaciones, consultar reportes y generar comprobantes en PDF. Incluye una interfaz gráfica con CustomTkinter y una interfaz por consola.
 
 ## Funcionalidades
 
-- Gestion de reservas:
-  - Crear, listar, buscar, editar y cancelar reservas.
-  - Reprogramar reservas canceladas.
-  - Verificar disponibilidad de habitaciones por fechas y cantidad de huespedes.
-  - Generar comprobantes de reserva en PDF.
-- Gestion de clientes:
-  - Registrar, buscar, editar y dar de baja o restaurar clientes.
-  - Consultar el historial de reservas de cada cliente.
-- Gestion de habitaciones:
-  - Consultar habitaciones disponibles.
-  - Buscar habitaciones por numero.
-  - Modificar precio y estado de mantenimiento.
-- Reportes:
-  - Llegadas del dia.
-  - Clientes frecuentes.
-  - Habitacion mas reservada.
-  - Habitacion con mayor facturacion.
-  - Ingresos totales.
-  - Ocupacion actual.
+### Administración y seguridad
 
-## Tecnologias
+- Inicio de sesión obligatorio para abrir la interfaz gráfica.
+- Usuario administrador fijo.
+- Contraseña protegida mediante hash SHA-256.
+- Acceso mediante contraseña visible u oculta.
+- Cierre de sesión que vuelve a mostrar la pantalla de acceso.
 
-- Python
-- CustomTkinter
-- tkcalendar
-- ReportLab
-- Pillow
-- Archivos JSON para persistencia
+### Reservas
+
+- Crear, listar, editar y cancelar reservas.
+- Reprogramar reservas canceladas.
+- Buscar reservas por DNI.
+- Filtrar por habitación, rango de fechas y estado.
+- Buscar reservas combinando varios filtros.
+- Ingresar fechas manualmente o seleccionarlas desde el calendario.
+- Verificar disponibilidad por fechas y cantidad de huéspedes.
+- Generar y abrir comprobantes PDF.
+- Impedir reservas solapadas en una misma habitación.
+- Impedir editar reservas canceladas, finalizadas o ya iniciadas.
+
+### Clientes
+
+- Registrar, buscar, editar y listar clientes.
+- Buscar por nombre, DNI o teléfono.
+- Filtrar por estado: activo o dado de baja.
+- Dar de baja o restaurar clientes.
+- Impedir dar de baja a un cliente con reservas vigentes.
+- Consultar el historial de reservas de cada cliente.
+
+### Habitaciones
+
+- Consultar el inventario de habitaciones.
+- Buscar por número y filtrar por estado.
+- Consultar disponibilidad según capacidad y fechas.
+- Modificar precio y estado de mantenimiento.
+- Impedir poner en mantenimiento una habitación con reservas vigentes o futuras.
+
+### Reportes
+
+- Llegadas del día.
+- Clientes frecuentes.
+- Habitación más reservada.
+- Habitación con mayor facturación.
+- Ingresos totales.
+- Ocupación actual.
+
+## Tecnologías
+
+- Python.
+- CustomTkinter.
+- tkcalendar.
+- ReportLab.
+- Pillow.
+- Archivos JSON para persistencia.
 
 ## Requisitos
 
 - Python 3.10 o superior.
-- Tkinter disponible en la instalacion de Python.
-- Sistema operativo Windows recomendado para la apertura e impresion de PDF.
+- Tkinter disponible en la instalación de Python.
+- Sistema operativo Windows recomendado para la apertura e impresión de PDF.
 
-## Instalacion
+## Instalación
 
 Desde una terminal ubicada en la carpeta del proyecto:
 
@@ -59,15 +86,26 @@ Instalar las dependencias:
 python -m pip install -r requirements.txt
 ```
 
-## Ejecucion
+## Ejecución
 
-### Interfaz grafica
+### Interfaz gráfica
 
 ```bash
 python frontend_main.py
 ```
 
-El punto de entrada crea la ventana principal de Hostel Melimer y carga las vistas de dashboard, reservas, clientes, habitaciones y reportes.
+Al abrir el programa, aparece primero el inicio de sesión. Luego de autenticar al administrador, se carga la ventana principal con el dashboard, reservas, clientes, habitaciones y reportes.
+
+### Acceso inicial
+
+```text
+Usuario: admin
+Contraseña: admin123
+```
+
+Estas credenciales corresponden al administrador fijo del sistema. No existe registro público de usuarios.
+
+La implementación utiliza SHA-256 para el trabajo académico. Para un entorno de producción se recomendaría reemplazarla por una biblioteca como `bcrypt` o `argon2`, que incorpora sal y una protección más adecuada para contraseñas.
 
 ### Interfaz por consola
 
@@ -75,11 +113,11 @@ El punto de entrada crea la ventana principal de Hostel Melimer y carga las vist
 python main.py
 ```
 
-La interfaz por consola ofrece menus para reservas, clientes, habitaciones y reportes.
+La interfaz por consola ofrece menús independientes para reservas, clientes, habitaciones y reportes.
 
 ## Datos
 
-La informacion se almacena en archivos JSON dentro de la carpeta `data`:
+La información se almacena en archivos JSON dentro de la carpeta `data`:
 
 ```text
 data/
@@ -90,11 +128,11 @@ data/
 ```
 
 - `customers.json`: clientes registrados y su estado.
-- `reservations.json`: reservas, fechas, importes y estado.
+- `reservations.json`: reservas, fechas, huéspedes, habitaciones, importes y estado.
 - `rooms.json`: inventario, capacidad, precio y mantenimiento.
-- `receipts/`: comprobantes PDF generados por la interfaz grafica.
+- `receipts/`: comprobantes PDF generados por la interfaz gráfica.
 
-Las escrituras utilizan archivos temporales y reemplazo atomico para reducir el riesgo de dejar archivos JSON corruptos si ocurre un error durante el guardado.
+Los JSON usan archivos temporales y reemplazo atómico para reducir el riesgo de dejar un archivo corrupto si ocurre un error durante el guardado.
 
 ## Estructura principal
 
@@ -103,9 +141,14 @@ TPFinal/
 ├── frontend_main.py
 ├── main.py
 ├── requirements.txt
+├── README.md
 ├── data/
 ├── frontend/
 │   ├── app.py
+│   ├── auth/
+│   │   ├── admin_auth.py
+│   │   └── login.py
+│   ├── assets/
 │   ├── components/
 │   ├── dialogs/
 │   ├── pdf/
@@ -124,24 +167,40 @@ TPFinal/
 
 ## Validaciones importantes
 
-- DNI de 8 digitos numericos.
-- Telefono de 9 digitos numericos.
-- Fechas validas en formato `dd/mm/yyyy`.
-- Check-in anterior al check-out.
-- Cantidad de huespedes entre 1 y 4.
-- Evita solapamientos de reservas en una misma habitacion.
-- Impide que una habitacion tenga estado de mantenimiento si posee reservas vigentes o futuras.
+- DNI de 8 dígitos numéricos.
+- Teléfono de 9 dígitos numéricos.
+- Nombre con contenido alfabético válido.
+- Fechas válidas en formato `dd/mm/yyyy`.
+- Check-in hoy o posterior.
+- Check-out posterior al Check-in.
+- Cantidad de huéspedes entre 1 y 4.
+- Disponibilidad real antes de confirmar una reserva.
+- Evita solapamientos de reservas en una misma habitación.
 - Impide dar de baja a un cliente con reservas vigentes.
+- Impide mantener habitaciones que tengan reservas vigentes o futuras.
 - Impide editar reservas canceladas, finalizadas o ya iniciadas.
+- Escrituras JSON validadas y guardadas de forma atómica.
 
-## Comprobacion del codigo
+## Comprobación del código
 
-Para compilar todos los archivos Python y detectar errores sintacticos:
+Para compilar todos los archivos Python y detectar errores sintácticos:
 
 ```bash
 python -m compileall -q .
 ```
 
-## Autores
+## Estado de alcance
 
-Proyecto realizado para la asignatura Fundamentos de la Programacion.
+El sistema incluye acceso administrativo, gestión completa de clientes y reservas, gestión de habitaciones, filtros, reportes y comprobantes PDF.
+
+Como mejoras futuras podrían incorporarse:
+
+- Contraseñas con `bcrypt` o `argon2`.
+- Registro y administración de múltiples usuarios.
+- Alta de nuevas habitaciones.
+- Fecha de inicio y fin para mantenimientos temporales.
+- Pruebas automatizadas con `pytest`.
+
+## Autor
+
+Proyecto realizado para la asignatura Fundamentos de la Programación.
