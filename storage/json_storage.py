@@ -147,20 +147,3 @@ def customer_has_reservations(customer_dni):
     return False
 
 
-# ==========================================
-# ELIMINAR CLIENTE
-# ==========================================
-
-def delete_customer(customer_dni):
-
-    customers = load_customers()
-
-    updated_customers = []
-
-    for customer in customers:
-
-        if customer["customer_dni"] != customer_dni:
-
-            updated_customers.append(customer)
-
-    save_customers(updated_customers)

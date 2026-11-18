@@ -120,7 +120,6 @@ def modify_reservation():
     )
 
     if reservations is None:
-
         return
 
     while True:
@@ -137,9 +136,11 @@ def modify_reservation():
 
         if option == "1":
 
-            modify_customer(reservation)
+            if modify_customer(reservation):
 
-            break
+                print("\nDatos actualizados correctamente.")
+
+            return
 
         elif option == "2":
 
@@ -150,7 +151,8 @@ def modify_reservation():
 
             save_reservations(reservations)
 
-            break
+            print("\nDatos actualizados correctamente.")
+            return
 
         elif option == "0":
 
@@ -161,8 +163,6 @@ def modify_reservation():
 
             print("Opción inválida.")
 
-    print("\nDatos actualizados correctamente.")
-
 
 # ==========================================
 # MODIFICAR DATOS DEL CLIENTE
@@ -172,9 +172,21 @@ def modify_customer(reservation):
 
     customers = load_customers()
 
-    customer = get_customer_by_dni(
-        reservation["customer_dni"]
-    )
+    customer = None
+
+    for item in customers:
+
+        if item["customer_dni"] == reservation["customer_dni"]:
+
+            customer = item
+
+            break
+
+    if customer is None:
+
+        print("Cliente no encontrado.")
+
+        return False
 
     while True:
 
@@ -205,7 +217,7 @@ def modify_customer(reservation):
                         "\nTeléfono actualizado correctamente."
                     )
 
-                    return
+                    return True
 
                 print(
                     "Teléfono inválido. Debe contener 9 dígitos."
@@ -213,7 +225,7 @@ def modify_customer(reservation):
 
         elif option == "0":
 
-            return
+            return False
 
         else:
 
