@@ -1,3 +1,5 @@
+from datetime import date, datetime
+
 from modules.payments import calculate_igv, calculate_subtotal, calculate_total
 from modules.reservation_status import is_reservation_cancelled
 from modules.rooms import get_available_rooms
@@ -7,7 +9,7 @@ from modules.validations import (
     validate_future_date,
     validate_guest_count
 )
-from storage.json_storage import load_reservations, save_reservations
+from storage.json_storage import DATA_LOCK, load_reservations, save_reservations
 
 
 def update_reservation(
@@ -27,6 +29,19 @@ def update_reservation(
             "Una reserva cancelada no se puede editar. "
             "Usá «Reprogramar y reactivar» para crear una nueva reserva."
         )
+
+    current_check_in = datetime.strptime(
+        reservation["check_in"], "%d/%m/%Y"
+    ).date()
+    if current_check_in <= date.today():
+        raise ValueError(
+            "No se puede editar una reserva que ya comenzó o finalizó."
+        )
+
+    if not validate_date(check_in) or not validate_future_date(check_in):
+        raise ValueError("El Check In debe ser hoy o una fecha futura válida.")
+    if not validate_date(check_out):
+        raise ValueError("Ingresá un Check Out válido.")
 
     available_rooms = get_available_rooms(
         guest_count,
@@ -65,7 +80,8 @@ def update_reservation(
         "total": calculate_total(subtotal, igv)
     })
 
-    save_reservations(reservations)
+    with DATA_LOCK:
+        save_reservations(reservations)
     return reservation
 
 
@@ -129,8 +145,9 @@ def rebook_cancelled_reservation(
         "total": calculate_total(subtotal, igv)
     })
 
-    reservations.append(new_reservation)
-    save_reservations(reservations)
+    with DATA_LOCK:
+        reservations.append(new_reservation)
+        save_reservations(reservations)
     return new_reservation
 
 

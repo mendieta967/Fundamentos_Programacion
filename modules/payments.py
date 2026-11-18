@@ -14,7 +14,7 @@ def calculate_subtotal(
     nights
 ):
 
-    return price_per_night * nights
+    return round(price_per_night * nights, 2)
 
 
 # ==========================================
@@ -23,7 +23,7 @@ def calculate_subtotal(
 
 def calculate_igv(subtotal):
 
-    return subtotal * IGV
+    return round(subtotal * IGV, 2)
 
 
 # ==========================================
@@ -35,4 +35,4 @@ def calculate_total(
     igv
 ):
 
-    return subtotal + igv
+    return round(subtotal + igv, 2)
