@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from storage.json_storage import load_reservations
+from storage.json_storage import load_reservations, save_json_atomic
 from modules.reservation_status import is_reservation_cancelled
 from datetime import datetime
 from frontend.validators.room_validator import RoomValidator
@@ -78,8 +78,7 @@ def save_rooms(rooms_by_number):
         for number, room in sorted(rooms_by_number.items())
     ]
 
-    with ROOMS_FILE.open("w", encoding="utf-8") as file:
-        json.dump(records, file, indent=4, ensure_ascii=False)
+    save_json_atomic(ROOMS_FILE, records)
 
 
 def set_room_price(room_number, price):

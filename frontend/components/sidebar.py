@@ -176,7 +176,7 @@ class Sidebar(ctk.CTkFrame):
 
         exit_button = ctk.CTkButton(
             self,
-            text="Salir",
+            text="Cerrar sesión",
             image=self.icon_salir,
             compound="left",
             height=52,
@@ -187,7 +187,7 @@ class Sidebar(ctk.CTkFrame):
             corner_radius=12,
             border_spacing=14,
             cursor="hand2",
-            command=self.master.destroy
+            command=self.master.logout
         )
 
         exit_button.grid(

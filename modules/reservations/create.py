@@ -311,8 +311,19 @@ def create_reservation():
 
     }
 
-    reservations = load_reservations()
+    with DATA_LOCK:
+        available_rooms = get_available_rooms(
+            guest_count,
+            check_in,
+            check_out
+        )
+        if not any(
+            available["number"] == room_number
+            for available in available_rooms
+        ):
+            print("La habitación ya no está disponible para esas fechas.")
+            return
 
-    reservations.append(reservation_data)
-
-    save_reservations(reservations)
+        reservations = load_reservations()
+        reservations.append(reservation_data)
+        save_reservations(reservations)

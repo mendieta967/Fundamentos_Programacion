@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
 
 import customtkinter as ctk
+from tkcalendar import Calendar
 
 from frontend.dialogs.alerts import messagebox
 from frontend.utils.icons import load_icon
@@ -16,6 +17,9 @@ from frontend.dialogs.search_reservation import SearchReservationDialog
 from frontend.validators.search_validator import SearchValidator
 from frontend.components.services.reservation_service import (
     cancel_reservation
+)
+from frontend.components.services.reservation_search_service import (
+    ReservationSearchService
 )
 from modules.reservation_status import is_reservation_cancelled
 from frontend.pdf.receipt_pdf import generate_receipt, print_receipt
@@ -118,6 +122,184 @@ class ReservationsView(ctk.CTkFrame):
         )
 
         # -------------------------------------------------
+        # FILTROS DE RESERVAS
+        # -------------------------------------------------
+
+        filter_bar = ctk.CTkFrame(
+            self,
+            fg_color="white",
+            corner_radius=10,
+            border_width=1,
+            border_color="#E2E8F0",
+            height=62
+        )
+        filter_bar.pack(
+            fill="x",
+            padx=35,
+            pady=(12, 0)
+        )
+        filter_bar.pack_propagate(False)
+
+        self.room_filter = ctk.CTkEntry(
+            filter_bar,
+            placeholder_text="Habitación",
+            height=38,
+            width=180,
+            border_width=1,
+            border_color="#CBD5E1",
+            corner_radius=8,
+            fg_color="#F8FAFC",
+            placeholder_text_color="#94A3B8",
+            font=("Segoe UI", 12)
+        )
+        self.room_filter.bind(
+            "<KeyRelease>",
+            lambda _event: self.refresh_table()
+        )
+        self.room_filter.bind(
+            "<Return>",
+            lambda _event: self.refresh_table()
+        )
+        self.room_filter.pack(
+            side="left",
+            padx=(12, 8),
+            pady=12
+        )
+
+        ctk.CTkLabel(
+            filter_bar,
+            text="DESDE",
+            font=("Segoe UI", 9, "bold"),
+            text_color="#94A3B8"
+        ).pack(side="left", padx=(2, 6))
+
+        checkin_row = ctk.CTkFrame(
+            filter_bar,
+            fg_color="transparent",
+            height=38
+        )
+        checkin_row.pack(side="left", padx=(0, 8), pady=12)
+        checkin_row.pack_propagate(False)
+
+        self.checkin_filter = ctk.CTkEntry(
+            checkin_row,
+            placeholder_text="dd/mm/yyyy",
+            height=38,
+            width=125,
+            border_width=1,
+            border_color="#CBD5E1",
+            corner_radius=8,
+            fg_color="#F8FAFC",
+            placeholder_text_color="#94A3B8",
+            font=("Segoe UI", 11)
+        )
+        self.checkin_filter.bind(
+            "<KeyRelease>",
+            lambda _event: self.refresh_table()
+        )
+        self.checkin_filter.bind(
+            "<Return>",
+            lambda _event: self.refresh_table()
+        )
+        self.checkin_filter.pack(side="left")
+
+        ctk.CTkButton(
+            checkin_row,
+            text="📅",
+            width=38,
+            height=38,
+            corner_radius=8,
+            fg_color="#2563EB",
+            hover_color="#1D4ED8",
+            command=lambda: self._open_date_picker(self.checkin_filter)
+        ).pack(side="left", padx=(6, 0))
+
+        ctk.CTkLabel(
+            filter_bar,
+            text="HASTA",
+            font=("Segoe UI", 9, "bold"),
+            text_color="#94A3B8"
+        ).pack(side="left", padx=(2, 6))
+
+        checkout_row = ctk.CTkFrame(
+            filter_bar,
+            fg_color="transparent",
+            height=38
+        )
+        checkout_row.pack(side="left", padx=(0, 12), pady=12)
+        checkout_row.pack_propagate(False)
+
+        self.checkout_filter = ctk.CTkEntry(
+            checkout_row,
+            placeholder_text="dd/mm/yyyy",
+            height=38,
+            width=125,
+            border_width=1,
+            border_color="#CBD5E1",
+            corner_radius=8,
+            fg_color="#F8FAFC",
+            placeholder_text_color="#94A3B8",
+            font=("Segoe UI", 11)
+        )
+        self.checkout_filter.bind(
+            "<KeyRelease>",
+            lambda _event: self.refresh_table()
+        )
+        self.checkout_filter.bind(
+            "<Return>",
+            lambda _event: self.refresh_table()
+        )
+        self.checkout_filter.pack(side="left")
+
+        ctk.CTkButton(
+            checkout_row,
+            text="📅",
+            width=38,
+            height=38,
+            corner_radius=8,
+            fg_color="#2563EB",
+            hover_color="#1D4ED8",
+            command=lambda: self._open_date_picker(self.checkout_filter)
+        ).pack(side="left", padx=(6, 0))
+
+        ctk.CTkLabel(
+            filter_bar,
+            text="ESTADO",
+            font=("Segoe UI", 9, "bold"),
+            text_color="#94A3B8"
+        ).pack(side="left", padx=(2, 8))
+
+        self.status_filter = ctk.CTkComboBox(
+            filter_bar,
+            values=[
+                "Todos los estados",
+                "Activa",
+                "Finalizada",
+                "Cancelada"
+            ],
+            width=170,
+            height=38,
+            state="readonly",
+            corner_radius=8,
+            border_width=1,
+            border_color="#CBD5E1",
+            fg_color="#F8FAFC",
+            text_color="#0F172A",
+            button_color="#2563EB",
+            button_hover_color="#1D4ED8",
+            font=("Segoe UI", 11)
+        )
+        self.status_filter.set("Todos los estados")
+        self.status_filter.configure(
+            command=lambda _value: self.refresh_table()
+        )
+        self.status_filter.pack(
+            side="left",
+            padx=(0, 12),
+            pady=12
+        )
+
+        # -------------------------------------------------
         # TABLA
         # -------------------------------------------------
 
@@ -138,6 +320,53 @@ class ReservationsView(ctk.CTkFrame):
 
         self.refresh_table()
 
+    def _open_date_picker(self, entry):
+        try:
+            selected_date = datetime.strptime(
+                entry.get().strip(),
+                "%d/%m/%Y"
+            ).date()
+        except ValueError:
+            selected_date = date.today()
+
+        picker = ctk.CTkToplevel(self)
+        picker.title("Seleccionar fecha")
+        picker.resizable(False, False)
+        picker.transient(self)
+
+        calendar = Calendar(
+            picker,
+            selectmode="day",
+            year=selected_date.year,
+            month=selected_date.month,
+            day=selected_date.day,
+            date_pattern="dd/mm/yyyy",
+            locale="es_PE"
+        )
+        calendar.pack(padx=12, pady=12)
+
+        def close_picker():
+            if picker.winfo_exists():
+                picker.destroy()
+
+        def select_date(event=None):
+            selected = calendar.selection_get()
+            if selected is None:
+                return
+
+            entry.delete(0, "end")
+            entry.insert(0, selected.strftime("%d/%m/%Y"))
+            close_picker()
+            self.refresh_table()
+
+        calendar.bind("<<CalendarSelected>>", select_date)
+        picker.protocol("WM_DELETE_WINDOW", close_picker)
+        picker.update_idletasks()
+        picker.geometry(
+            f"+{self.winfo_rootx() + 160}+{self.winfo_rooty() + 170}"
+        )
+        picker.grab_set()
+
     def refresh_table(self):
 
         for widget in self.table.winfo_children():
@@ -151,29 +380,36 @@ class ReservationsView(ctk.CTkFrame):
                 for customer in load_customers()
             }
             reservations = load_reservations()
+            filtered_reservations = ReservationSearchService.filter_reservations(
+                reservations,
+                room_query=self.room_filter.get(),
+                date_from=self.checkin_filter.get(),
+                date_to=self.checkout_filter.get(),
+                status=self.status_filter.get()
+            )
         except (OSError, ValueError, KeyError, TypeError) as error:
             ctk.CTkLabel(
                 self.table,
-                text=f"No se pudieron cargar las reservas: {error}",
+                text=f"No se pudieron aplicar los filtros: {error}",
                 font=("Segoe UI", 13),
                 text_color="#B91C1C",
                 wraplength=800
             ).pack(padx=20, pady=28)
             return
 
-        for index, reservation in enumerate(reservations):
+        if not filtered_reservations:
+            ctk.CTkLabel(
+                self.table,
+                text="No se encontraron reservas con esos filtros.",
+                font=("Segoe UI", 13),
+                text_color="#64748B"
+            ).pack(padx=20, pady=28)
+            return
+
+        for index, (reservation_index, reservation, status) in enumerate(
+            filtered_reservations
+        ):
             check_out = reservation["check_out"]
-            if is_reservation_cancelled(reservation):
-                status = "Cancelada"
-            else:
-                status = (
-                    "Finalizada"
-                    if datetime.strptime(
-                        check_out,
-                        "%d/%m/%Y"
-                    ).date() < datetime.today().date()
-                    else "Activa"
-                )
 
             self.add_row(
                 customers.get(reservation["customer_dni"], reservation["customer_dni"]),
@@ -186,9 +422,9 @@ class ReservationsView(ctk.CTkFrame):
                     check_out, "%d/%m/%Y"
                 ).strftime("%d/%m/%y"),
                 status,
-                reservation_index=index,
+                reservation_index=reservation_index,
                 reservation=reservation,
-                show_separator=index < len(reservations) - 1
+                show_separator=index < len(filtered_reservations) - 1
             )
 
     # =====================================================

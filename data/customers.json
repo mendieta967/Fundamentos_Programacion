@@ -3,7 +3,7 @@
         "customer_name": "Pedro Olortegui Mendieta",
         "customer_dni": "73812771",
         "customer_phone": "962314587",
-        "status": "active"
+        "status": "inactive"
     },
     {
         "customer_name": "Alfonso Olortegui ",
@@ -13,7 +13,7 @@
     {
         "customer_name": "Pedro Mendieta",
         "customer_dni": "73812777",
-        "customer_phone": "968574321",
+        "customer_phone": "968574322",
         "status": "active"
     },
     {

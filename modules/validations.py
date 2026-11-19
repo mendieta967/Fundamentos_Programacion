@@ -71,12 +71,12 @@ def calculate_nights(check_in, check_out):
 
 def custom_input(message):
 
-    value = input(message)
+    value = input(message).strip()
 
     if value.lower() == "cancelar":
 
         print("Reserva cancelada. Gracias por visitarnos.")
 
-        exit()
+        return None
 
     return value
